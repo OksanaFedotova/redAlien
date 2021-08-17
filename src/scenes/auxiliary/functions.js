@@ -77,13 +77,3 @@ export const shuffle = (array) => {
     [randomNumberOne, randomNumberTwo] = randomNumberOne < randomNumberTwo && index===2 ? [randomNumberTwo, randomNumberOne]:[randomNumberOne, randomNumberTwo]
     return [randomNumberOne, randomNumberTwo, operator]
   };
-
-  export function loadFont(name, url) {
-    var newFont = new FontFace(name, `url(${url})`);
-    newFont.load().then(function (loaded) {
-        document.fonts.add(loaded);
-        console.log('S')
-    }).catch(function (error) {
-        return error;
-    });
-}
