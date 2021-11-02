@@ -23,44 +23,46 @@ export const shuffle = (array) => {
         result = numberOne * numberTwo;
         break;
       case '÷':
-        result = numberOne % numberTwo;
+        result = numberOne / numberTwo;
         break;
       default:
     }
     return result;
   };
 
-  export const getQuestion = (level) => {
+  const getProblem = (level) => {
 
     let randomNumberOne, randomNumberTwo, operator, index;
     const operators = ['+', '-', '*', '÷'];
 
     switch (level) {
-      case '1':
+      case 1:
         randomNumberOne = getRandomInt(11);
         randomNumberTwo = getRandomInt(11);
         index = getRandomInt(2);
         operator = operators[index];
         break;
-      case '2':
-        randomNumberOne = getRandomInt(101);
-        randomNumberTwo = getRandomInt(101);
-        index = getRandomInt(2);
+      case 2:
+        randomNumberOne = getRandomInt(20);
+        randomNumberTwo = getRandomInt(20);
+        index = getRandomInt(3);
         operator = operators[index];
         break;
-      case '3':
+      case 3:
         index = getRandomInt(4);
+        operator = operators[index];
         if (index === 3) {
-          const factor1 = getRandomInt(11);
-          const factor2 = getRandomInt(11)
+          const factor1 = getRandomInt(10);
+          const factor2 = getRandomInt(10);
+          console.log(factor1, factor2)
           randomNumberOne = factor1 * factor2;
           randomNumberTwo = factor2;
+          break;
         }
-        randomNumberOne = getRandomInt(11);
-        randomNumberTwo = getRandomInt(11);
-        operator = operators[index];
+        randomNumberOne = getRandomInt(21);
+        randomNumberTwo = getRandomInt(21);
         break;
-      case '4':
+      case 4:
         index = getRandomInt(4);
         if (index === 3) {
           const factor1 = getRandomInt(101);
@@ -74,6 +76,29 @@ export const shuffle = (array) => {
         break;
       default:
     }
+    //console.log(randomNumberOne, randomNumberTwo)
     [randomNumberOne, randomNumberTwo] = randomNumberOne < randomNumberTwo && index===2 ? [randomNumberTwo, randomNumberOne]:[randomNumberOne, randomNumberTwo]
     return [randomNumberOne, randomNumberTwo, operator]
   };
+
+  export const getQuestion = (level) => {
+
+    const [randomNumberOne, randomNumberTwo, operator] = getProblem(level)
+    const question = `${randomNumberOne} ${operator} ${randomNumberTwo}`;
+    const correctAnswer = calculate(randomNumberOne, operator, randomNumberTwo);
+    return [question, correctAnswer];
+  };
+  
+ export const getOptions = (correctAnswer) => {
+    let option1 = getRandomInt(correctAnswer + 5);
+    let option2 = getRandomInt(correctAnswer + 6);
+    if (option1 === correctAnswer || option1 === option2 || option2 === correctAnswer) {
+        while(option1 === correctAnswer || option1 === option2 || option2 === correctAnswer) {
+            option1 = getRandomInt(correctAnswer + 6);
+            option2 = getRandomInt(correctAnswer + 5);
+        }
+    }
+    
+    return [option1, option2];
+};
+
