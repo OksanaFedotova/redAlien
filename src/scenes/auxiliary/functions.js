@@ -1,6 +1,8 @@
-export function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
+export function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //Максимум не включается, минимум включается
+}
 
 export const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -30,6 +32,16 @@ export const shuffle = (array) => {
     return result;
   };
 
+  const getDivision = (a, b) => {
+    const factor1 = getRandomInt(0, a);
+    let factor2 = getRandomInt(0, b);
+    while (factor2 === 0) {
+      factor2 = getRandomInt(11);
+    }
+    const randomNumberOne = factor1 * factor2;
+    const randomNumberTwo = factor2;
+    return [randomNumberOne, randomNumberTwo]
+  }
   const getProblem = (level) => {
 
     let randomNumberOne, randomNumberTwo, operator, index;
@@ -37,47 +49,54 @@ export const shuffle = (array) => {
 
     switch (level) {
       case 1:
-        randomNumberOne = getRandomInt(11);
-        randomNumberTwo = getRandomInt(11);
-        index = getRandomInt(2);
+        randomNumberOne = getRandomInt(0, 11);
+        randomNumberTwo = getRandomInt(0, 11);
+        index = getRandomInt(0, 2);
         operator = operators[index];
         break;
       case 2:
-        randomNumberOne = getRandomInt(20);
-        randomNumberTwo = getRandomInt(20);
-        index = getRandomInt(3);
+        randomNumberOne = getRandomInt(0, 20);
+        randomNumberTwo = getRandomInt(0, 20);
+        index = getRandomInt(0, 3);
         operator = operators[index];
         break;
       case 3:
-        index = getRandomInt(4);
+        index = getRandomInt(0, 4);
         operator = operators[index];
         if (index === 3) {
-          const factor1 = getRandomInt(10);
-          const factor2 = getRandomInt(10);
-          console.log(factor1, factor2)
-          randomNumberOne = factor1 * factor2;
-          randomNumberTwo = factor2;
+          let randomNumers = getDivision(11, 11);
+          [randomNumberOne, randomNumberTwo] = randomNumers;
           break;
         }
-        randomNumberOne = getRandomInt(21);
-        randomNumberTwo = getRandomInt(21);
+        randomNumberOne = getRandomInt(0, 21);
+        randomNumberTwo = getRandomInt(0, 21);
         break;
       case 4:
-        index = getRandomInt(4);
-        if (index === 3) {
-          const factor1 = getRandomInt(101);
-          const factor2 = getRandomInt(101)
-          randomNumberOne = factor1 * factor2;
-          randomNumberTwo = factor2;
-        }
-        randomNumberOne = getRandomInt(101);
-        randomNumberTwo = getRandomInt(101);
+        index = getRandomInt(0, 4);
         operator = operators[index];
+        if (index === 3) {
+          let randomNumers = getDivision(21, 11);
+          [randomNumberOne, randomNumberTwo] = randomNumers;
+          break;
+        }
+        randomNumberOne = getRandomInt(0, 101);
+        randomNumberTwo = getRandomInt(0, 101);
         break;
-      default:
+        case 5:
+        index = getRandomInt(0, 4);
+        operator = operators[index];
+        if (index === 3) {
+          let randomNumers = getDivision(101, 51);
+          [randomNumberOne, randomNumberTwo] = randomNumers;
+          break;
+        }
+        randomNumberOne = getRandomInt(0, 1001);
+        randomNumberTwo = getRandomInt(0, 1001);
+        break;
+        default:
+        level = 1;
     }
-    //console.log(randomNumberOne, randomNumberTwo)
-    [randomNumberOne, randomNumberTwo] = randomNumberOne < randomNumberTwo && index===2 ? [randomNumberTwo, randomNumberOne]:[randomNumberOne, randomNumberTwo]
+    //[randomNumberOne, randomNumberTwo] = randomNumberOne < randomNumberTwo && index===2 ? [randomNumberTwo, randomNumberOne]:[randomNumberOne, randomNumberTwo]
     return [randomNumberOne, randomNumberTwo, operator]
   };
 
@@ -90,6 +109,11 @@ export const shuffle = (array) => {
   };
   
  export const getOptions = (correctAnswer) => {
+   const rand1 = getRandomInt(1, 5);
+   const rand2 = getRandomInt(1, 5);
+   const option1 = correctAnswer + rand1;
+   const option2 = correctAnswer - rand2;
+   /*
     let option1 = getRandomInt(correctAnswer + 5);
     let option2 = getRandomInt(correctAnswer + 6);
     if (option1 === correctAnswer || option1 === option2 || option2 === correctAnswer) {
@@ -98,7 +122,7 @@ export const shuffle = (array) => {
             option2 = getRandomInt(correctAnswer + 5);
         }
     }
-    
+    */
     return [option1, option2];
 };
 

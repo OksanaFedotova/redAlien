@@ -62,7 +62,7 @@ export default class GameScene extends Phaser.Scene
 
         //lives
         heartsIndex = 0;
-        live = 1;
+        live = 3;
         let y = 180;
         let x = 600;
 
@@ -91,8 +91,8 @@ export default class GameScene extends Phaser.Scene
         hearts = [];
 
         for (let i = 0; i < live; i++) {
-            let x = 640 + i*32;
-           hearts[i] = this.physics.add.sprite(x, 26, 'heart').setScale(2);
+            let x = 760 - i*38;
+            hearts[i] = this.physics.add.sprite(x, 26, 'heart').setScale(2.5);
         }
   
         this.anims.create({
@@ -110,7 +110,7 @@ export default class GameScene extends Phaser.Scene
         let scoreText = this.add.text(16, 16, `Счёт: ${score}`, { fontSize: '32px', fill: '#000' });
 
         //levels
-        let level = 1;
+        let level = 5;
         let levelText = this.add.text(16, 45, `Уровень: ${level}`, { fontSize: '32px', fill: '#000' });
 
         //get question and answers value
@@ -123,10 +123,10 @@ export default class GameScene extends Phaser.Scene
         answers = answersValues.map((option) => {
         let answerText = this.add.text(25, 20, `${option}`, style).setOrigin(0, 0);
         answerText.name = 'text';
-        let bubble = this.add.image(0, 0, 'bubble').setScale(0.18, 0.18).setOrigin(0, 0);
+        let bubble = this.add.image(0, 0, 'bubble').setScale(0.4, 0.2).setOrigin(0, 0);
         let container = this.add.container(x, y, [bubble, answerText]);
         this.physics.world.enable(container);
-        y += 110;
+        y += 120;
         return container;
         });
 
@@ -145,10 +145,10 @@ export default class GameScene extends Phaser.Scene
             };
 
             if (score % 50 === 0 && score != 0) {
-                if(level === 4) {
-                    level = 4;
-                }
                 level ++;
+                if(level >= 5) {
+                    level = 5;
+                }
             }
             levelText.setText('Уровень:' + level);
 
@@ -170,6 +170,7 @@ export default class GameScene extends Phaser.Scene
         this.physics.add.overlap(answersGroup, crow, change, null, this);
 
         //pause
+        /*
         const pause = () => {
             this.music.pause();
             this.scene.launch('pause');
@@ -177,7 +178,7 @@ export default class GameScene extends Phaser.Scene
         }
         
         const button = new Button(650, 550, 'Пауза', style2, this, pause, 'start');
-       
+       */
     }
 
     update() 
