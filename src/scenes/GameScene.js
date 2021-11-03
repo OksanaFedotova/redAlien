@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getQuestion, shuffle, getOptions } from './auxiliary/functions';
-import { Button } from './auxiliary/button';
+//import { Button } from './auxiliary/button';
 
 //variables
 let crow, sky1, sky2;
@@ -31,6 +31,8 @@ export default class GameScene extends Phaser.Scene
         this.load.image('bubble', 'assets/images/bubble.png');
 
         this.load.image('start', 'assets/images/start.png');
+
+        this.load.spritesheet('sound', 'assets/images/sound.png', { frameWidth: 365, frameHeight: 380 })
 
         this.load.spritesheet('heart', 'assets/images/lives.png', { frameWidth: 16, frameHeight: 14 });
 
@@ -168,23 +170,57 @@ export default class GameScene extends Phaser.Scene
 
         const answersGroup = this.add.group(answers);
         this.physics.add.overlap(answersGroup, crow, change, null, this);
+        /*
 
         //pause
-        /*
+     
         const pause = () => {
             this.music.pause();
             this.scene.launch('pause');
             this.scene.pause();
         }
-        
+
         const button = new Button(650, 550, 'Пауза', style2, this, pause, 'start');
-       */
+        */
+
+        //music off/on
+        this.buttonSoundIsPressed = false;
+        const soundPause = () => {
+            this.buttonSoundIsPressed = true;
+            this.music.pause()
+            this.buttonSound.anims.play('off', false);
+        }
+        const soundResume = () => {
+            this.buttonSoundIsPressed = false;
+            this.music.play({
+                    loop: true,
+                    volume: 0.7
+            })
+            this.buttonSound.anims.play('on', false);
+        }
+        this.buttonSound = this.add.sprite(55, 550, 'sound').setScale(0.2, 0.2);
+        this.anims.create({
+            key: 'off',
+            frames: this.anims.generateFrameNumbers('sound', { start: 0, end: 1 }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.anims.create({
+            key: 'on',
+            frames: this.anims.generateFrameNumbers('sound', { start: 1, end: 0 }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.buttonSound.setInteractive();
+        this.buttonSound.on('pointerdown', () => {
+            this.buttonSoundIsPressed? soundResume(): soundPause()
+        })
     }
 
     update() 
     {   
         if (!stopMusic) {
-            if(this.music.isPaused) {
+            if(this.music.isPaused && this.buttonSoundIsPressed === false) {
                 this.music.play({
                     loop: true,
                     volume: 0.7
@@ -192,6 +228,7 @@ export default class GameScene extends Phaser.Scene
         }
 
     }
+
       
         this.elementsFly([sky1, sky2]);
 
