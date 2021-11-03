@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { getQuestion, shuffle, getOptions } from './auxiliary/functions';
-//import { Button } from './auxiliary/button';
+import { Button } from './auxiliary/button';
 
 //variables
 let crow, sky1, sky2;
@@ -26,7 +26,7 @@ export default class GameScene extends Phaser.Scene
         this.load.image('sky', 'assets/images/DaySky.png');
         this.load.image('skyTop', 'assets/images/DaySkyTop.png');
 
-        this.load.spritesheet('crow', 'assets/images/crow.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet('crow', 'assets/images/crow.png', { frameWidth: 250, frameHeight: 210 });
 
         this.load.image('bubble', 'assets/images/bubble.png');
 
@@ -81,10 +81,10 @@ export default class GameScene extends Phaser.Scene
         
         //crow
        crow = this.physics.add.sprite(100, 300, 'crow');
-       crow.setScale(2)
+       crow.setScale(0.5)
        this.anims.create({
             key: 'fly',
-            frames: this.anims.generateFrameNumbers('crow', { start: 0, end: 5 }),
+            frames: this.anims.generateFrameNumbers('crow', { start: 0, end: 7 }),
             frameRate: 10,
             repeat: -1
         });
@@ -112,7 +112,7 @@ export default class GameScene extends Phaser.Scene
         let scoreText = this.add.text(16, 16, `Счёт: ${score}`, { fontSize: '32px', fill: '#000' });
 
         //levels
-        let level = 5;
+        let level = 1;
         let levelText = this.add.text(16, 45, `Уровень: ${level}`, { fontSize: '32px', fill: '#000' });
 
         //get question and answers value
@@ -170,10 +170,10 @@ export default class GameScene extends Phaser.Scene
 
         const answersGroup = this.add.group(answers);
         this.physics.add.overlap(answersGroup, crow, change, null, this);
-        /*
+     
 
         //pause
-     
+        /*
         const pause = () => {
             this.music.pause();
             this.scene.launch('pause');
@@ -181,8 +181,8 @@ export default class GameScene extends Phaser.Scene
         }
 
         const button = new Button(650, 550, 'Пауза', style2, this, pause, 'start');
+ 
         */
-
         //music off/on
         this.buttonSoundIsPressed = false;
         const soundPause = () => {
