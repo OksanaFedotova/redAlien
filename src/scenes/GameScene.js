@@ -22,7 +22,23 @@ export default class GameScene extends Phaser.Scene
     }
  
     preload()
-    {
+    {  
+        const progress = this.add.graphics();
+        const loaderLabel = this.add.text(this.cameras.main.width/2, this.cameras.main.height/2, 'Загрузка...', { font: '20px monospace', fill: '#310062' }
+        );
+        console.log(loaderLabel);
+
+        this.load.on('progress', function (value) {
+            progress.clear();
+            progress.fillStyle(0xffffff, 1);
+            progress.fillRect(0, 270, 800 * value, 60);
+        });
+
+        this.load.on('complete', function () {
+            loaderLabel.destroy();
+            progress.destroy();
+        });
+
         this.load.image('sky', 'assets/images/DaySky.png');
         this.load.image('skyTop', 'assets/images/DaySkyTop.png');
 
@@ -128,13 +144,12 @@ export default class GameScene extends Phaser.Scene
         let bubble = this.add.image(0, 0, 'bubble').setScale(0.4, 0.2).setOrigin(0, 0);
         let container = this.add.container(x, y, [bubble, answerText]);
         this.physics.world.enable(container);
-        y += 120;
+        y += 130;
         return container;
         });
 
         //change question and options after answer
         const change = (answer, crow) => {
-
             if(+answer.list[1].text === correctAnswer) {
                 select.play();
                 score += 10;
@@ -152,8 +167,9 @@ export default class GameScene extends Phaser.Scene
                     level = 5;
                 }
             }
-            levelText.setText('Уровень:' + level);
 
+            levelText.setText('Уровень:' + level);
+    
             [question, correctAnswer, answersValues] = this.getRound(level);
             questionText.setText(`${question}`);
             answers.map((answer, i) => {
