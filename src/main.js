@@ -11,8 +11,8 @@ bridge.send('VKWebAppInit', {});
 
 const config = {
 	type: Phaser.AUTO,
-	width: 700,
-	height: 300,
+	width: 1000,
+	height: 4050,
 	physics: {
 		default: 'arcade',
 		arcade: {
