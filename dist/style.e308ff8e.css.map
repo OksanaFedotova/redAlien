@@ -1,1 +1,0 @@
-{"version":3,"sources":["style.css"],"names":[],"mappings":"AAAA;IACI,oBAAoB,EAAE,eAAe;IACrC,+CAAkD,EAAE,4BAA4B;GACjF","file":"style.e308ff8e.css","sourceRoot":"../src","sourcesContent":["@font-face {\n    font-family: Baloo_2; /* Имя шрифта */\n    src: url(../public/assets/Baloo_2/Baloo2-Bold.ttf); /* Путь к файлу со шрифтом */\n   }"]}

@@ -4,14 +4,14 @@
     "phaser": "^3.55.2",
     "phaser3-webfont-loader": "^1.0.0"
   },
-  "name": "crows",
+  "name": "platformer",
   "version": "1.0.0",
   "description": "arcade game with phaser",
   "main": "index.js",
   "devDependencies": {
     "cssnano": "^5.0.9",
     "eslint": "^7.32.0",
-    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-airbnb": "^19.0.0",
     "parcel-bundler": "^1.9.4",
     "postcss": "^8.3.11"
   },
@@ -20,18 +20,10 @@
     "build": "parcel build src/index.html --out-dir dist --no-minify",
     "test": "npx jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/OksanaFedotova/crows.git"
-  },
   "keywords": [
     "arcade"
   ],
   "author": "Oksana Fedotova",
   "license": "UNLICENSED",
-  "bugs": {
-    "url": "https://github.com/OksanaFedotova/crows/issues"
-  },
-  "type": "module",
-  "homepage": "https://github.com/OksanaFedotova/crows#readme"
+  "type": "module"
 }

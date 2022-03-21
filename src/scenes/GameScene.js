@@ -1,18 +1,39 @@
 import Phaser from 'phaser';
-import { getQuestion, shuffle, getOptions } from './auxiliary/functions';
-import { Button } from './auxiliary/button';
+import { getRange, getOverlap, getRandomArbitrary } from '../auxiliary';
+function isNotEmpty(obj) {
+    for (let key in obj) {
+      return true;
+    }
+    return false;
+  }
 
 //variables
-let crow, sky1, sky2;
+let player, cursors;
+let dangerousTiles;
 
-let cursors;
+let heartsImages = [];
+let heartsIndex = 2;
+let gameOver;
+const hearts = {
+    0: "heart",
+    1: "heart",
+    2: "heart",
+}
+let coins, chest, chestState;
+const chests = [];
+chestState = true;
+const leftSlopes = [];
+const rightSlopes = [];
+let score, scoreText
+score = 0;
 
-let question, questionText, correctAnswer, answers, answersValues;
-let style;
-let live, hearts, mistake, heartsIndex;
+function collectCoins (player, coin) { 
+    coin.destroy();
 
-let stopMusic
+    score += 10;
+    scoreText.setText('score:' + score);
 
+}
 
 export default class GameScene extends Phaser.Scene
 {
@@ -22,286 +43,365 @@ export default class GameScene extends Phaser.Scene
     }
  
     preload()
-    {  
-        const progress = this.add.graphics();
-        const loaderLabel = this.add.text(this.cameras.main.width/2, this.cameras.main.height/2, 'Загрузка...', { font: '20px monospace', fill: '#310062' }
-        );
-        console.log(loaderLabel);
+    {   
+        //sky
+        this.load.image('sky', 'assets/images/Sky.png');
+        //cloud
+        this.load.image('cloud', 'assets/images/Cloud_1.png');
+        this.load.image('cloud2', 'assets/images/Cloud_2.png');
+        //player
+        this.load.spritesheet('dude', 'assets/images/dude.png', { frameWidth: 32, frameHeight: 48 });
+        //hills
+        this.load.image('hill', 'assets/images/Hills_1.png');
+        this.load.image('hill2', 'assets/images/Hills_2.png');
+        //mountain
+        for (let i = 0; i < 4; i++) {
+            this.load.image(`mountain${i}`, `assets/images/Mountain_${i+1}.png`);
+        }
+        //hill left
+        this.load.image('hillLeft', 'assets/images/GrassHillLeft.png');
 
-        this.load.on('progress', function (value) {
-            progress.clear();
-            progress.fillStyle(0xffffff, 1);
-            progress.fillRect(0, 270, 800 * value, 60);
-        });
+        //heart
+        this.load.spritesheet('heart', 'assets/images/hearts.png', { frameWidth: 120, frameHeight: 104 });
+        this.load.image('blackHeart', 'assets/images/blackHeart.png');
 
-        this.load.on('complete', function () {
-            loaderLabel.destroy();
-            progress.destroy();
-        });
+        //environment
+        this.load.image('tree', 'assets/images/environment/tree.png');
+        this.load.image('grass1', 'assets/images/environment/grass1.png');
 
-        this.load.image('sky', 'assets/images/DaySky.png');
-        this.load.image('skyTop', 'assets/images/DaySkyTop.png');
+        //coins
+        this.load.spritesheet('coin', 'assets/images/coin.png', { frameWidth: 67, frameHeight: 66});
 
-        this.load.spritesheet('crow', 'assets/images/crow.png', { frameWidth: 250, frameHeight: 210 });
+        //chest
+        this.load.spritesheet('chest', 'assets/images/chest.png', { frameWidth: 150, frameHeight: 167});
 
-        this.load.image('bubble', 'assets/images/bubble.png');
+        //potions
+        this.load.image('jump', 'assets/images/jump-potion.png');
 
-        this.load.image('start', 'assets/images/start.png');
+        // map made with Tiled in JSON format
+        this.load.tilemapTiledJSON('map', 'assets/map.json');
+        // tiles in spritesheet 
+        this.load.image('tiles', 'assets/tiles.png');
 
-        this.load.spritesheet('sound', 'assets/images/sound.png', { frameWidth: 365, frameHeight: 380 })
-
-        this.load.spritesheet('heart', 'assets/images/lives.png', { frameWidth: 16, frameHeight: 14 });
-
-        this.load.audio('theme', 'assets/audio/theme.mp3');
-
-        this.load.audio('select', 'assets/audio/select.mp3');
-
-        this.load.audio('wrong', 'assets/audio/wrong.mp3');
-
-
+        //plugin for animation
+        this.load.scenePlugin('AnimatedTiles', 'https://raw.githubusercontent.com/nkholski/phaser-animated-tiles/master/dist/AnimatedTiles.js', 'animatedTiles', 'animatedTiles');    
     }
  
-
     create()
-
-    {   
-        //audio
-        this.music = this.sound.add('theme');
-        this.music.play({
-            loop: true,
-            volume: 0.7
-        });
-        stopMusic = false;
-       
-        const select = this.sound.add('select');
-
-        const wrong = this.sound.add('wrong');
-
-
-        //lives
-        heartsIndex = 0;
-        live = 3;
-        let y = 180;
-        let x = 600;
-
-        //style text
-        style = { fontFamily: '"Baloo 2"' , fontSize: '60px', color: '#006286', align: 'center' };
-        const style2 = { fontFamily: '"Baloo 2"' , fontSize: '40px', color: '#006286', align: 'center' };
-
+    { 
+        gameOver = true
+        
+        //level size
+        this.cameras.main.setBounds(0, 0, 9600, 1024);
 
         //sky
-        this.add.image(0, 0, 'skyTop').setScale(1.6, 1.6).setOrigin(0, 0);
-        sky1 = this.add.image(0, 200, 'sky').setScale(1.6, 1.6).setOrigin(0, 0);
-        sky2 = this.add.image(800, 200, 'sky').setScale(1.6, 1.6).setOrigin(0, 0);
-
-        
-        //crow
-       crow = this.physics.add.sprite(100, 300, 'crow');
-       crow.setScale(0.5)
-       this.anims.create({
-            key: 'fly',
-            frames: this.anims.generateFrameNumbers('crow', { start: 0, end: 7 }),
-            frameRate: 10,
-            repeat: -1
-        });
-
-        //lives
-        hearts = [];
-
-        for (let i = 0; i < live; i++) {
-            let x = 760 - i*38;
-            hearts[i] = this.physics.add.sprite(x, 26, 'heart').setScale(2.5);
+        let skyX = 0;
+        for (let i = 0; i < 5; i++) {
+            const sky = this.add.image(skyX, 0, 'sky').setOrigin(0, 0);
+            skyX += 1920;
         }
-  
+        
+        //clouds
+        const generateClouds = (cloudImg, x, y, scale) => {
+            for (let i = 0; i < 100; i++) {
+                const cloud = this.add.image(x, y, cloudImg).setOrigin(0, 0).setScale(scale);
+                const sign = Math.round(getRandomArbitrary(0, 1));
+                sign? y += getRandomArbitrary(50, 100): y -= getRandomArbitrary(50, 100);
+                y > 550? y = 500: y;
+                y < 50? y = 50: y;
+                x += getRandomArbitrary(200, 300);
+            }
+        }
+        generateClouds('cloud', 100, 200, 0.3);
+        generateClouds('cloud2', 200, 300, 0.5);
+
+        //mountains
+        let mountainX = 0;
+        let mountainY = 600;
+        const getMountingsSet = (x, y) => {
+            const mountains = [];
+            for (let i = 0; i < 4; i++) {
+                mountains[i] = this.add.image(x, y, `mountain${i}`).setOrigin(0, 0).setScale(0.5);
+                i % 2? x += 100: x += 220
+                i % 2? y-= 100: y += 100;
+            };
+        };
+        for (let i = 0; i < 12; i ++) {
+            getMountingsSet(mountainX, mountainY);
+            mountainX += 796;
+        }
+        
+        //clouds
+        generateClouds('cloud', 150, 450, 0.5);
+        generateClouds('cloud2', 50, 550, 0.3);
+        
+        
+        //hills
+        let hillX = 0;
+        for (let i = 0; i < 11; i++) {
+            const hill2 = this.add.image(hillX, 500, 'hill2').setOrigin(0, 0).setScale(0.5);
+            const hill = this.add.image(hillX, 450, 'hill').setOrigin(0, 0).setScale(0.5);
+            hillX += 960;
+        };
+
+        //map and tileset
+        const map = this.make.tilemap({key: 'map'});
+        const tileSet = map.addTilesetImage("tiles", "tiles");
+        const ground = map.createLayer('ground', tileSet, 0, 0).setScale(0.5);
+
+        this.animatedTiles.init(map);
+
+        //tileMap
+        let coordinates = [];
+        let collidedTiles = [];
+   
+        ground.forEachTile((tile) => {
+            if (tile.properties.collides) {
+                collidedTiles.push([tile.pixelX/2, tile.pixelY/2]);
+                //const tree = this.physics.add.sprite(100, tile.pixelY/2, 'tree').setOrigin(0, 0);
+            }
+            else if(tile.properties.dangerous) {
+                coordinates.push([tile.pixelX/2, tile.pixelY/2]);
+            }
+            else if(tile.properties.hill) {
+                switch (tile.properties.hill) {
+                    case 'left':
+                        let xLeft = tile.pixelX/2;
+                        let yLeft = tile.pixelY/2;
+                        const slopeLeft = new Phaser.Geom.Line(xLeft, yLeft + 64, xLeft + 64, yLeft);
+                        leftSlopes.push(slopeLeft);
+                        break;
+                    case 'right':
+                        let xRight = tile.pixelX/2;
+                        let yRight = tile.pixelY/2;
+                        const slopeRight = new Phaser.Geom.Line(xRight, yRight, xRight + 64, yRight + 64);
+                        rightSlopes.push(slopeRight);
+                    default:
+                        break;
+                }
+            }
+
+           if(tile.properties.special) {
+               const chest = this.add.sprite(tile.pixelX/2, tile.pixelY/2-64, 'chest').setOrigin(0, 0).setScale(0.3, 0.3);
+               chests.push(chest);
+               this.physics.world.enable(chest);
+               this.physics.add.collider(chest, ground);
+            }
+           // console.log(tile.properties.special);
+         });
+        //chest
+        console.log(chests)
+        /*
+        chest = this.add.sprite(20, 800, 'chest').setOrigin(0, 0).setScale(0.3, 0.3);
+        this.physics.world.enable(chest);
+        this.physics.add.collider(chest, ground);
+*/
+        this.anims.create({
+            key: 'chest',
+            frames: this.anims.generateFrameNumbers('chest', {start: 0, end: 5}),
+            frameRate: 10,
+            repeat: 0
+        });
+        
+        dangerousTiles = getRange(coordinates);
+
+        //enviroment
+        const tree = this.add.image(100, 896 - 120, 'tree').setOrigin(0, 0).setScale(0.5, 0.5);
+
+         //lives
+         let xHearts = 760;
+         heartsImages = Object.values(hearts).map((heart) => {
+             const heartImage = this.add.sprite(xHearts, 50, heart).setScale(0.25).setScrollFactor(0, 0);
+             xHearts -= 38;
+             return heartImage;
+            });
+        
+        
         this.anims.create({
             key: 'disappear',
             frames: this.anims.generateFrameNumbers('heart', { start: 0, end: 1 }),
             frameRate: 10,
-            repeat: 0
+            repeat: 10
         });
 
-        //cursors
-        cursors = this.input.keyboard.addKeys('UP,DOWN');
+        //player
+        player = this.physics.add.sprite(100, 400, 'dude'); 
+        player.setBounce(0.2);
+       
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'turn',
+            frames: [ { key: 'dude', frame: 4 } ],
+            frameRate: 20
+        });
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
 
         //score
-        let score = 0;
-        let scoreText = this.add.text(16, 16, `Счёт: ${score}`, { fontSize: '32px', fill: '#000' });
+        scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '20px', fill: '#000' }).setScrollFactor(0, 0);
 
-        //levels
-        let level = 1;
-        let levelText = this.add.text(16, 45, `Уровень: ${level}`, { fontSize: '32px', fill: '#000' });
-
-        //get question and answers value
-        [question, correctAnswer, answersValues] = this.getRound(level);
-
-        //question
-        questionText = this.add.text(150, 120, `${question}`, style);
-
-        //answers
-        answers = answersValues.map((option) => {
-        let answerText = this.add.text(25, 20, `${option}`, style).setOrigin(0, 0);
-        answerText.name = 'text';
-        let bubble = this.add.image(0, 0, 'bubble').setScale(0.4, 0.2).setOrigin(0, 0);
-        let container = this.add.container(x, y, [bubble, answerText]);
-        this.physics.world.enable(container);
-        y += 130;
-        return container;
+        //coins, grass
+        this.anims.create({
+            key: 'coin',
+            frames: this.anims.generateFrameNumbers('coin', {start: 0, end: 14}),
+            repeat: -1
         });
 
-        //change question and options after answer
-        const change = (answer, crow) => {
-            if(+answer.list[1].text === correctAnswer) {
-                select.play();
-                score += 10;
-                scoreText.setText('Счёт:' + score);
-
-            } else {
-                wrong.play();
-                live -= 1;
-                mistake = true;
-            };
-
-            if (score % 50 === 0 && score != 0) {
-                level ++;
-                if(level >= 5) {
-                    level = 5;
+        coins = collidedTiles.map(([x, y], i) => {
+                if(i % 3 === 0) {
+                    const grass1 = this.add.image(x + 10, y - 3, 'grass1').setOrigin(0, 0).setScale(0.5, 0.5);
+                    const coin = this.add.sprite(x + 30, y - 100, 'coin').setOrigin(0, 0).setScale(0.3, 0.3);
+                    coin.anims.play('coin', true);
+                    return coin;
                 }
-            }
-
-            levelText.setText('Уровень:' + level);
-    
-            [question, correctAnswer, answersValues] = this.getRound(level);
-            questionText.setText(`${question}`);
-            answers.map((answer, i) => {
-                answer.x = 600;
-                let answerValue = answer.getByName('text');
-                answerValue.setText(answersValues[i]);
-                return answer;
-            });
-            if(live === 0) {
-
-                this.gameOver();
-             }
-        };
-
-        const answersGroup = this.add.group(answers);
-        this.physics.add.overlap(answersGroup, crow, change, null, this);
-     
-
-        //pause
-        /*
-        const pause = () => {
-            this.music.pause();
-            this.scene.launch('pause');
-            this.scene.pause();
-        }
-
-        const button = new Button(650, 550, 'Пауза', style2, this, pause, 'start');
- 
-        */
-        //music off/on
-        this.buttonSoundIsPressed = false;
-        const soundPause = () => {
-            this.buttonSoundIsPressed = true;
-            this.music.pause()
-            this.buttonSound.anims.play('off', false);
-        }
-        const soundResume = () => {
-            this.buttonSoundIsPressed = false;
-            this.music.play({
-                    loop: true,
-                    volume: 0.7
             })
-            this.buttonSound.anims.play('on', false);
+    
+        .filter((coin) => coin)
+        
+        .map((coin, i) => {
+            this.physics.world.enable(coin, Phaser.Physics.Arcade.DYNAMIC_BODY);
+            coin.body.allowGravity = false;
+            this.physics.add.overlap(player, coin, collectCoins, null, this);
+            });
+        
+        //chest open
+        const chestOpen = (player, chest) => {
+            if (chestState) {
+                chest.anims.play('chest', false);
+                this.add.image(chest.x + 10, chest.y, 'jump').setScale(0.2, 0.2).setOrigin(0, 0);
+            }
+          chestState = false;
         }
-        this.buttonSound = this.add.sprite(55, 550, 'sound').setScale(0.2, 0.2);
-        this.anims.create({
-            key: 'off',
-            frames: this.anims.generateFrameNumbers('sound', { start: 0, end: 1 }),
-            frameRate: 10,
-            repeat: 0
-        });
-        this.anims.create({
-            key: 'on',
-            frames: this.anims.generateFrameNumbers('sound', { start: 1, end: 0 }),
-            frameRate: 10,
-            repeat: 0
-        });
-        this.buttonSound.setInteractive();
-        this.buttonSound.on('pointerdown', () => {
-            this.buttonSoundIsPressed? soundResume(): soundPause()
-        })
+        chests.map((chest) => this.physics.add.overlap(player, chest, chestOpen, null, this));
+        //cursors
+        cursors = this.input.keyboard.createCursorKeys();
+
+        //physic
+        ground.setCollisionByProperty({ collides: true });
+        this.physics.add.collider(player, ground);
+        this.cameras.main.startFollow(player);
+        
     }
 
     update() 
-    {   
-        if (!stopMusic) {
-            if(this.music.isPaused && this.buttonSoundIsPressed === false) {
-                this.music.play({
-                    loop: true,
-                    volume: 0.7
-            })
+    {
+        let playerUp = false;
+        let playerDown = false;
+        player.body.allowGravity = true;
+
+        leftSlopes.map((slope) => {
+            if (Phaser.Geom.Intersects.LineToRectangle(slope, player.getBounds())) {
+                playerUp = true;
+            }
+        
+        });
+        rightSlopes.map((slope) => {
+            if (Phaser.Geom.Intersects.LineToRectangle(slope, player.getBounds())) {
+                playerDown = true;
+             };
+        })
+        
+
+        //moves
+        //move left
+        if (cursors.left.isDown && player.x > 0)
+        {   
+            if (playerUp) {
+                this.moveDiagonalLeft(player);
+            } else if (playerDown) {
+                this.moveDiagonalLeftUp(player)
+            }
+            player.setVelocityX(-160);
+            player.anims.play('left', true);
+        }
+        //move right
+        else if (cursors.right.isDown && player.x < 9600)
+        {
+            if (playerUp) {
+                this.moveDiagonalRight(player);
+            } else if (playerDown) (
+                this.moveDiagonalRightDown(player)
+            )
+            player.setVelocityX(160);
+            player.anims.play('right', true);
+        }
+        else
+        {
+            player.setVelocityX(0);
+            if(playerUp || playerDown) {
+                player.body.stop();
+                player.body.allowGravity = false;
+            }
+            player.anims.play('turn');
+
+        }
+        //jump
+        if (cursors.up.isDown && player.body.onFloor() || cursors.up.isDown && playerUp || cursors.up.isDown && playerDown)
+        {
+            player.setVelocityY(-450);
         }
 
+       if (getOverlap(player, dangerousTiles)) {
+           if(gameOver) {
+            this.gameOver();
+            gameOver = false;
+           }
+       }
     }
 
-      
-        this.elementsFly([sky1, sky2]);
+//additional methods 
 
-        this.elementsFly(answers);
-    
-        //crow
-        crow.anims.play('fly', true);
-        if (cursors.UP.isDown) {
-            crow.y -= 2;
-        } 
+      //move diagonal
+      moveDiagonalRight (player) {
+          //player.body.allowGravity = false;
+          player.setVelocityX(160);
+          player.setVelocityY(-160);
+      }
+      moveDiagonalLeft (player) {
+        //player.body.allowGravity = false;
+        player.setVelocityX(-160);
+        player.setVelocityY(160);
+      }
+      moveDiagonalRightDown (player) {
+        player.setVelocityX(160);
+        player.setVelocityY(160);
+      }
+      moveDiagonalLeftUp (player) {
+        //player.body.allowGravity = false;
+        player.setVelocityX(-160);
+        player.setVelocityY(-160);
+      }
 
-        else if (cursors.DOWN.isDown) {
-            crow.y += 2
-        }
-     
-        //lives 
-        if(mistake) {
-            hearts[heartsIndex].anims.play('disappear', false);
-            mistake = false;
-            heartsIndex += 1;
-         }
-    }
-    
-    getRound(level) {
-     //question
-    const [question, correctAnswer] = getQuestion(level);
-    //answers
-    const options = getOptions(correctAnswer);
-    const answersValues = [correctAnswer, ...options];
-    shuffle(answersValues);
 
-    return [question, correctAnswer, answersValues];
-    };
+//collectCoins
 
-    gameOver() {
-        stopMusic = true;
-        this.time.delayedCall(250, function() {
-            this.sound.removeAll();
+      gameOver() {
+          heartsImages[heartsIndex].anims.play('disappear', false);
+          console.log(heartsImages);
+          hearts[`${heartsIndex}`] = 'blackHeart';
+          heartsIndex --;
+        //stopMusic = true;
+        this.time.delayedCall(500, function() {
+            //this.sound.removeAll();
             this.cameras.main.fade(250);
         }, [], this);
         // restart game
-        this.time.delayedCall(500, function() {
-            //this.scene.remove();
+        this.time.delayedCall(750, function() {
             this.scene.restart();
         }, [], this);
         return;
         }
 
-    elementsFly(elements) {
-        elements.map((element) => {
-            let rect = element.getBounds();
-            element.x -= 2;
-                if(rect.x + rect.width <= 0) {
-                    element.x = 798;
-                } 
-            })
-          }
-        
-
 }
+
+
