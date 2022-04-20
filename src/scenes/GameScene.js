@@ -1,11 +1,5 @@
 import Phaser from 'phaser';
 import { getRange, getOverlap, getRandomArbitrary } from '../auxiliary';
-function isNotEmpty(obj) {
-    for (let key in obj) {
-      return true;
-    }
-    return false;
-  }
 
 //variables
 let player, cursors;
@@ -19,22 +13,29 @@ const hearts = {
     1: "heart",
     2: "heart",
 }
-let coins, chest, chestState;
+let coins, potion;
 const chests = [];
-chestState = true;
 const leftSlopes = [];
 const rightSlopes = [];
 let score, scoreText
 score = 0;
+const superPower = {
+    jump: 0,
+    run:  0, 
+    life: false,
+}
 
 function collectCoins (player, coin) { 
     coin.destroy();
-
     score += 10;
     scoreText.setText('score:' + score);
+}
+function takePotion (player, potion) {
+    setTimeout(() => potion.destroy(), 500 )
+    superPower.jump = Date.now() + 45000;
+    //console.log(superPower.time)
 
 }
-
 export default class GameScene extends Phaser.Scene
 {
     constructor()
@@ -73,10 +74,15 @@ export default class GameScene extends Phaser.Scene
         this.load.spritesheet('coin', 'assets/images/coin.png', { frameWidth: 67, frameHeight: 66});
 
         //chest
-        this.load.spritesheet('chest', 'assets/images/chest.png', { frameWidth: 150, frameHeight: 167});
+        this.load.spritesheet('chest', 'assets/images/chest3.png', { frameWidth: 132, frameHeight: 156});
 
         //potions
-        this.load.image('jump', 'assets/images/jump-potion.png');
+        for (let i = 0; i < 4; i++) {
+            this.load.image(`potion${i}`, `'assets/images/potions/potion${i}.png`);
+        }
+
+        //enemy
+        this.load.image('enemy', 'assets/images/enemy.png')
 
         // map made with Tiled in JSON format
         this.load.tilemapTiledJSON('map', 'assets/map.json');
@@ -106,9 +112,9 @@ export default class GameScene extends Phaser.Scene
             for (let i = 0; i < 100; i++) {
                 const cloud = this.add.image(x, y, cloudImg).setOrigin(0, 0).setScale(scale);
                 const sign = Math.round(getRandomArbitrary(0, 1));
-                sign? y += getRandomArbitrary(50, 100): y -= getRandomArbitrary(50, 100);
-                y > 550? y = 500: y;
-                y < 50? y = 50: y;
+                sign? y += getRandomArbitrary(50, 150): y -= getRandomArbitrary(50, 150);
+                y > 700? y = 700: y;
+                y < 100? y = 100: y;
                 x += getRandomArbitrary(200, 300);
             }
         }
@@ -154,15 +160,20 @@ export default class GameScene extends Phaser.Scene
         //tileMap
         let coordinates = [];
         let collidedTiles = [];
-   
+
         ground.forEachTile((tile) => {
+
+            //collided tiles
             if (tile.properties.collides) {
                 collidedTiles.push([tile.pixelX/2, tile.pixelY/2]);
-                //const tree = this.physics.add.sprite(100, tile.pixelY/2, 'tree').setOrigin(0, 0);
+   
             }
+           //dangerous tiles
             else if(tile.properties.dangerous) {
                 coordinates.push([tile.pixelX/2, tile.pixelY/2]);
             }
+
+            //hills
             else if(tile.properties.hill) {
                 switch (tile.properties.hill) {
                     case 'left':
@@ -181,40 +192,22 @@ export default class GameScene extends Phaser.Scene
                 }
             }
 
+            //special tiles
            if(tile.properties.special) {
-               const chest = this.add.sprite(tile.pixelX/2, tile.pixelY/2-64, 'chest').setOrigin(0, 0).setScale(0.3, 0.3);
-               chests.push(chest);
-               this.physics.world.enable(chest);
-               this.physics.add.collider(chest, ground);
+               chests.push([tile.pixelX/2, tile.pixelY/2-100]);
             }
-           // console.log(tile.properties.special);
          });
-        //chest
-        console.log(chests)
-        /*
-        chest = this.add.sprite(20, 800, 'chest').setOrigin(0, 0).setScale(0.3, 0.3);
-        this.physics.world.enable(chest);
-        this.physics.add.collider(chest, ground);
-*/
-        this.anims.create({
-            key: 'chest',
-            frames: this.anims.generateFrameNumbers('chest', {start: 0, end: 5}),
-            frameRate: 10,
-            repeat: 0
-        });
-        
+         
+        //dangerous tiles
         dangerousTiles = getRange(coordinates);
 
-        //enviroment
-        const tree = this.add.image(100, 896 - 120, 'tree').setOrigin(0, 0).setScale(0.5, 0.5);
-
-         //lives
-         let xHearts = 760;
-         heartsImages = Object.values(hearts).map((heart) => {
-             const heartImage = this.add.sprite(xHearts, 50, heart).setScale(0.25).setScrollFactor(0, 0);
-             xHearts -= 38;
-             return heartImage;
-            });
+        //lives
+        let xHearts = 760;
+        heartsImages = Object.values(hearts).map((heart) => {
+            const heartImage = this.add.sprite(xHearts, 50, heart).setScale(0.25).setScrollFactor(0, 0);
+            xHearts -= 38;
+            return heartImage;
+        });
         
         
         this.anims.create({
@@ -222,6 +215,27 @@ export default class GameScene extends Phaser.Scene
             frames: this.anims.generateFrameNumbers('heart', { start: 0, end: 1 }),
             frameRate: 10,
             repeat: 10
+        });
+  
+        //trees 
+        collidedTiles.map(([x, y], i) => {
+             if (i % 10 === 0 && y > 750) {
+                 const tree = this.physics.add.sprite(x, y - 245, 'tree').setOrigin(0,0);
+                 tree.body.allowGravity = false;
+             }
+         })
+
+        //chest 
+        this.anims.create({
+            key: 'chest',
+            frames: this.anims.generateFrameNumbers('chest', {start: 5, end: 0}),
+            frameRate: 10,
+            repeat: 0
+        });
+
+        const chestGroup = this.physics.add.group();
+        chests.map(([x,y]) => {
+            const chest = chestGroup.create(x, y, 'chest').setOrigin(0, 0).setScale(0.3, 0.3);
         });
 
         //player
@@ -246,6 +260,20 @@ export default class GameScene extends Phaser.Scene
             repeat: -1
         });
 
+        //open chest
+        const chestOpen = (player, chest) => {
+            chest.anims.play('chest', false);
+            console.log(chest)
+            
+            potion = this.add.image(chest.x + 10, chest.y, 'potion0').setScale(0.2, 0.2).setOrigin(0, 0);
+            this.physics.world.enable(potion);
+            potion.body.setAllowGravity(false);
+            this.physics.add.overlap(player, potion, takePotion, null, this)
+        
+            chest.setActive(false);
+            this.physics.world.disable(chest);
+            //console.log(potion)
+        }
 
         //score
         scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '20px', fill: '#000' }).setScrollFactor(0, 0);
@@ -258,6 +286,7 @@ export default class GameScene extends Phaser.Scene
         });
 
         coins = collidedTiles.map(([x, y], i) => {
+        
                 if(i % 3 === 0) {
                     const grass1 = this.add.image(x + 10, y - 3, 'grass1').setOrigin(0, 0).setScale(0.5, 0.5);
                     const coin = this.add.sprite(x + 30, y - 100, 'coin').setOrigin(0, 0).setScale(0.3, 0.3);
@@ -273,25 +302,18 @@ export default class GameScene extends Phaser.Scene
             coin.body.allowGravity = false;
             this.physics.add.overlap(player, coin, collectCoins, null, this);
             });
-        
-        //chest open
-        const chestOpen = (player, chest) => {
-            if (chestState) {
-                chest.anims.play('chest', false);
-                this.add.image(chest.x + 10, chest.y, 'jump').setScale(0.2, 0.2).setOrigin(0, 0);
-            }
-          chestState = false;
-        }
-        chests.map((chest) => this.physics.add.overlap(player, chest, chestOpen, null, this));
+   
         //cursors
         cursors = this.input.keyboard.createCursorKeys();
 
         //physic
         ground.setCollisionByProperty({ collides: true });
         this.physics.add.collider(player, ground);
-        this.cameras.main.startFollow(player);
-        
+        this.physics.add.collider(chestGroup, ground);
+        this.physics.add.overlap(player, chestGroup, chestOpen, null, this);
+        this.cameras.main.startFollow(player); 
     }
+
 
     update() 
     {
@@ -348,7 +370,12 @@ export default class GameScene extends Phaser.Scene
         //jump
         if (cursors.up.isDown && player.body.onFloor() || cursors.up.isDown && playerUp || cursors.up.isDown && playerDown)
         {
-            player.setVelocityY(-450);
+           // console.log(superPower.jump, Date.now())
+            if(superPower.jump !== 0 && superPower.jump > Date.now()) {
+                player.setVelocityY(-600);
+            } else {
+                player.setVelocityY(-450);
+            }
         }
 
        if (getOverlap(player, dangerousTiles)) {
@@ -381,9 +408,6 @@ export default class GameScene extends Phaser.Scene
         player.setVelocityX(-160);
         player.setVelocityY(-160);
       }
-
-
-//collectCoins
 
       gameOver() {
           heartsImages[heartsIndex].anims.play('disappear', false);
