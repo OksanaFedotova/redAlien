@@ -1,18 +1,16 @@
 import Phaser from 'phaser';
-import { getRange, getOverlap, getRandomArbitrary } from '../auxiliary';
+import Enviroment from '../classes/Enviroment';
+import Lives from '../classes/Lives';
+import { getRange, getOverlap, getRandomArbitrary } from '../functions/auxiliary';
 
 //variables
 let player, cursors;
 let dangerousTiles;
 
-let heartsImages = [];
+
 let heartsIndex = 2;
 let gameOver;
-const hearts = {
-    0: "heart",
-    1: "heart",
-    2: "heart",
-}
+
 let coins, potion;
 const chests = [];
 const leftSlopes = [];
@@ -202,28 +200,9 @@ export default class GameScene extends Phaser.Scene
         dangerousTiles = getRange(coordinates);
 
         //lives
-        let xHearts = 760;
-        heartsImages = Object.values(hearts).map((heart) => {
-            const heartImage = this.add.sprite(xHearts, 50, heart).setScale(0.25).setScrollFactor(0, 0);
-            xHearts -= 38;
-            return heartImage;
-        });
-        
-        
-        this.anims.create({
-            key: 'disappear',
-            frames: this.anims.generateFrameNumbers('heart', { start: 0, end: 1 }),
-            frameRate: 10,
-            repeat: 10
-        });
+        this.lives = new Lives(this);
   
-        //trees 
-        collidedTiles.map(([x, y], i) => {
-             if (i % 10 === 0 && y > 750) {
-                 const tree = this.physics.add.sprite(x, y - 245, 'tree').setOrigin(0,0);
-                 tree.body.allowGravity = false;
-             }
-         })
+        this.enviroment = new Enviroment(this, collidedTiles);
 
         //chest 
         this.anims.create({
@@ -288,7 +267,6 @@ export default class GameScene extends Phaser.Scene
         coins = collidedTiles.map(([x, y], i) => {
         
                 if(i % 3 === 0) {
-                    const grass1 = this.add.image(x + 10, y - 3, 'grass1').setOrigin(0, 0).setScale(0.5, 0.5);
                     const coin = this.add.sprite(x + 30, y - 100, 'coin').setOrigin(0, 0).setScale(0.3, 0.3);
                     coin.anims.play('coin', true);
                     return coin;
@@ -410,10 +388,8 @@ export default class GameScene extends Phaser.Scene
       }
 
       gameOver() {
-          heartsImages[heartsIndex].anims.play('disappear', false);
-          console.log(heartsImages);
-          hearts[`${heartsIndex}`] = 'blackHeart';
-          heartsIndex --;
+        this.lives.lose(heartsIndex);
+        heartsIndex --;
         //stopMusic = true;
         this.time.delayedCall(500, function() {
             //this.sound.removeAll();
