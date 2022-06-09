@@ -8,6 +8,8 @@ import {
 } from "../functions/auxiliary";
 import Clouds from "../classes/nature/Clouds";
 import Mountains from "../classes/nature/Mountains";
+import Chests from "../classes/Chests";
+import Enemies from "../classes/Enemies";
 
 //variables
 let player, cursors;
@@ -17,7 +19,7 @@ let heartsIndex = 2;
 let gameOver;
 
 let coins, potion;
-const chests = [];
+//const chests = [];
 const leftSlopes = [];
 const rightSlopes = [];
 let score, scoreText;
@@ -90,7 +92,6 @@ export default class GameScene extends Phaser.Scene {
     //potions
     for (let i = 0; i < 4; i++) {
       this.load.image(`potion${i}`, `assets/images/potions/potion${i}.png`);
-      console.log(`potion${i}`)
     }
 
     //enemy
@@ -130,6 +131,8 @@ export default class GameScene extends Phaser.Scene {
     const cloud3 = new Clouds(this, "cloud", 300, 200);
     const cloud4 = new Clouds(this, "cloud2", 400, 300);
 
+    //chests
+    const chests = new Chests(this);
 
     //hills
     let hillX = 0;
@@ -194,10 +197,9 @@ export default class GameScene extends Phaser.Scene {
             break;
         }
       }
-
       //special tiles
       if (tile.properties.special) {
-        chests.push([tile.pixelX / 2, tile.pixelY / 2 - 100]);
+        chests.getCoordinates([tile.pixelX / 2, tile.pixelY / 2 - 100])
       }
     });
 
@@ -206,25 +208,16 @@ export default class GameScene extends Phaser.Scene {
 
     //lives
     this.lives = new Lives(this);
-
+    //enviroment
     this.enviroment = new Enviroment(this, collidedTiles);
-
-    //chest
-    this.anims.create({
-      key: "chest",
-      frames: this.anims.generateFrameNumbers("chest", { start: 5, end: 0 }),
-      frameRate: 10,
-      repeat: 0,
-    });
-
-    const chestGroup = this.physics.add.group();
-    chests.map(([x, y]) => {
-      const chest = chestGroup
-        .create(x, y, "chest")
-        .setOrigin(0, 0)
-        .setScale(0.3, 0.3);
-    });
-
+    //chests
+    this.chestGroup = chests.createGroup();
+    //enemies 
+     const enemiesLayer = map.getObjectLayer("enemies")
+     console.log(enemiesLayer)
+    this.enemies = new Enemies(this);
+    this.enemies.getCoordinates([300,400]);
+    this.enemies.createGroup();
     //player
     player = this.physics.add.sprite(100, 400, "dude");
     player.setBounce(0.2);
@@ -248,20 +241,22 @@ export default class GameScene extends Phaser.Scene {
     });
 
     //open chest
+    let i = 0;
     const chestOpen = (player, chest) => {
       chest.anims.play("chest", false);
-
+      //console.log(chestGroup.children.keys)
       potion = this.add
-        .image(chest.x + 10, chest.y, "potion0")
+        .image(chest.x + 10, chest.y, `potion${i}`)
         .setScale(0.2, 0.2)
         .setOrigin(0, 0);
+      i++;
       this.physics.world.enable(potion);
       potion.body.setAllowGravity(false);
       this.physics.add.overlap(player, potion, takePotion, null, this);
 
       chest.setActive(false);
       this.physics.world.disable(chest);
-      console.log(potion)
+
     };
 
     //score
@@ -302,8 +297,8 @@ export default class GameScene extends Phaser.Scene {
     //physic
     ground.setCollisionByProperty({ collides: true });
     this.physics.add.collider(player, ground);
-    this.physics.add.collider(chestGroup, ground);
-    this.physics.add.overlap(player, chestGroup, chestOpen, null, this);
+    this.physics.add.collider(this.chestGroup, ground);
+    this.physics.add.overlap(player, this.chestGroup, chestOpen, null, this);
     this.cameras.main.startFollow(player);
   }
 
