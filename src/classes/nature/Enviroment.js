@@ -5,7 +5,7 @@ export default class Enviroment {
     ground.map(([x, y], i) => {
       if (i % 10 === 0 && y > 750) {
         const tree = scene.physics.add
-          .sprite(x - 50, y - 245, "tree")
+          .sprite(x - 80, y - 245, "tree")
           .setOrigin(0, 0);
         tree.body.allowGravity = false;
       }

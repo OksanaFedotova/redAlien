@@ -7,11 +7,10 @@ const hearts = {
 export default class Lives {
   constructor(scene, x = 760, y = 50) {
     this.scene = scene;
-
     this.heartsImages = Object.values(hearts).map((heart) => {
       const heartImage = scene.add
         .sprite(x, y, heart)
-        .setScale(0.25)
+        //.setScale(0.25)
         .setScrollFactor(0, 0);
       x -= 38;
       return heartImage;
@@ -25,7 +24,6 @@ export default class Lives {
       repeat: 10,
     });
   }
-
   lose(i) {
     this.heartsImages[i].anims.play("disappear", false);
     hearts[`${i}`] = "blackHeart";

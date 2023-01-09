@@ -1,6 +1,5 @@
 export default class Enemies {
   constructor(scene) {
-    this.scene = scene;
     this.coordinates = [];
     this.enemiesGroup = scene.physics.add.group();
   }
@@ -8,14 +7,22 @@ export default class Enemies {
     this.coordinates.push(coordinates);
     return this.coordinates;
   }
-   createGroup() {
-    this.enemiesGroup = this.coordinates.map(([x, y]) => {
+   createGroup(scene, player, callback) {
+    const enemiesGroup = this.coordinates.map(([x, y]) => {
       const enemy = this.enemiesGroup
         .create(x, y, "enemy")
         .setOrigin(0, 0)
-        .setScale(0.3, 0.3)
-        .body.setAllowGravity(false)
         return enemy;
-    });
+    })
+    .map((enemy) => {
+       scene.physics.world.enable(enemy, Phaser.Physics.Arcade.DYNAMIC_BODY);
+       enemy.body.allowGravity = false;
+       scene.physics.add.overlap(player, enemy, callback, null, this);
+       const x = Phaser.Display.Bounds.GetBounds(enemy).x;
+       const y = Phaser.Display.Bounds.GetBounds(enemy).y;
+       enemy.setCircle(60)
+       return enemy;
+      });
+      return enemiesGroup
    }
 }
