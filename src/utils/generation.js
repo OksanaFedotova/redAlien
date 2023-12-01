@@ -13,13 +13,7 @@ let tiles = {
     slopeLeft: [3, 1],
   },
 };
-export const createRowGrass = (
-  x,
-  y,
-  layer,
-  length = 5,
-  indices = tiles.rowGrass
-) => {
+export const createRowGrass = (x, y, layer, length = 5, indices = tiles.rowGrass) => {
   const tiles = [];
   indices.map((index, i) => {
     if (i > length - 1) {
@@ -69,7 +63,7 @@ export const createLeftSlope = (
   }
   const line = new Phaser.Geom.Line(xLeft - 44, yLeft, x - 44, y);
   var graphics = scene.add.graphics({
-    lineStyle: { width: 2, color: "black" },
+    lineStyle: { width: 2, color: 'black' },
   });
   graphics.strokeLineShape(line);
   return line;
@@ -102,7 +96,7 @@ export const createRightSlope = (
   }
   const line = new Phaser.Geom.Line(xLeft - 44, yLeft, x - 44, y);
   var graphics = scene.add.graphics({
-    lineStyle: { width: 2, color: "black" },
+    lineStyle: { width: 2, color: 'black' },
   });
   graphics.strokeLineShape(line);
   return line;

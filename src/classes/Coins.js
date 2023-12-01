@@ -1,20 +1,35 @@
+import Phaser from 'phaser';
 export default class Coins {
-  constructor (scene, x, y, img) {
-    scene.anims.create({
-      key: "coin",
-      frames: scene.anims.generateFrameNumbers("coin", { start: 0, end: 14 }),
+  constructor(scene) {
+    this.scene = scene;
+  }
+  preloadCoins() {
+    this.scene.load.spritesheet('coin', 'assets/images/coin.png', {
+      frameWidth: 67,
+      frameHeight: 66,
+    });
+    this.scene.load.audio('coins', 'assets/audio/coin2.mp3');
+  }
+  createCoins() {
+    this.scene.anims.create({
+      key: 'coin',
+      frames: this.scene.anims.generateFrameNumbers('coin', { start: 0, end: 14 }),
       repeat: -1,
     });
   }
   addCoins(tiles, scene, player, callback) {
-   const coins = tiles
+    this.coinsSound = this.scene.sound.add('coins', {
+      volume: 0.6,
+      loop: false,
+    });
+    tiles
       .map(([x, y], i) => {
-        if (i % 3 === 0) {
+        if (i % 2 === 0) {
           const coin = scene.add
-            .sprite(x + 30, y - 100, "coin")
+            .sprite(x + 30, y - 100, 'coin')
             .setOrigin(0, 0)
-            .setScale(0.3, 0.3);
-          coin.anims.play("coin", true);
+            .setScale(0.4, 0.4);
+          coin.anims.play('coin', true);
           return coin;
         }
       })
