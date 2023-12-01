@@ -15,6 +15,7 @@ import Checkpoints from '../classes/Checkpoints';
 import { heartsIndex } from '../utils/variables';
 import Player from '../classes/Player';
 import Sounds from '../classes/Sounds';
+import ButtonControl from '../classes/ButtonControl';
 
 //variables
 let playerUp = false;
@@ -54,6 +55,9 @@ export default class GameScene extends Phaser.Scene {
     if (data.playerX) playerX = data.playerX;
   }
   preload() {
+    //controls
+    this.controls = new ButtonControl(this);
+    this.controls.preloadControl();
     //sound
     sound = new Sounds(this);
     sound.preloadSound();
@@ -121,7 +125,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    console.log('create');
     const style = { fontFamily: 'Baloo_2', fontSize: '2rem', color: '#38a5c6', align: 'center' };
 
     gameOverFlag = true;
@@ -285,6 +288,10 @@ export default class GameScene extends Phaser.Scene {
     this.slopeCurrent;
 
     this.intersection = [];
+
+    //controls
+    this.controls.createControl();
+    console.log(this.controls);
   }
   update() {
     player.body.allowGravity = true;
@@ -328,7 +335,7 @@ export default class GameScene extends Phaser.Scene {
     }
     //прыжки на склонах
     if (playerObj.isFalling && (playerUp || playerDown)) {
-      if (!cursors.up.isDown) {
+      if (!(cursors.up.isDown || this.controls.upFlag)) {
         const line = this.slopeCurrent[0];
         const line2 = this.slopeCurrentRight[0];
         let intersection;
@@ -337,7 +344,7 @@ export default class GameScene extends Phaser.Scene {
         } else if (line2) {
           intersection = Phaser.Geom.Intersects.GetLineToRectangle(line2, player.getBounds())[0].y;
         }
-        if (!cursors.up.isDown) {
+        if (!(cursors.up.isDown || this.controls.upFlag)) {
           if (line) {
             player.y = intersection;
             if (player.y - 10 < line.y2) player.y = line.y2 - 40;
@@ -350,12 +357,12 @@ export default class GameScene extends Phaser.Scene {
       }
     }
     //moves
-    playerObj.move(cursors, playerUp, playerDown, speed);
+    playerObj.move(cursors, this.controls, playerUp, playerDown, speed);
     //jump
-    if (cursors.up.isDown && player.body.onFloor()) {
+    if ((cursors.up.isDown || this.controls.upFlag) && player.body.onFloor()) {
       player.setVelocityY(-450);
     }
-    playerObj.jump(cursors, playerUp, playerDown);
+    playerObj.jump(cursors, this.controls, playerUp, playerDown);
     //dangerous
     this.physics.world.overlapTiles(
       player,
@@ -383,6 +390,7 @@ export default class GameScene extends Phaser.Scene {
     if (player.y > 1024) {
       this.gameOver();
     }
+    this.controls.updateControl();
   }
 
   gameOver() {

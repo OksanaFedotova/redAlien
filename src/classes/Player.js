@@ -25,11 +25,11 @@ export default class Player {
     this.isOnTheSlope = false;
     this.isFalling = false;
   }
-  move(cursors, playerUp, playerDown, speed) {
+  move(cursors, controls, playerUp, playerDown, speed) {
     if (playerUp || playerDown) {
       this.player.body.allowGravity = false;
     }
-    if (cursors.left.isDown && this.player.x > 0) {
+    if ((cursors.left.isDown || controls.leftFlag) && this.player.x > 0) {
       if (playerUp) {
         this.moveDiagonalLeft(speed);
         this.player.anims.play('left', true);
@@ -40,7 +40,7 @@ export default class Player {
         this.player.setVelocityX(-speed);
         this.player.anims.play('left', true);
       }
-    } else if (cursors.right.isDown && this.player.x < 9600) {
+    } else if ((cursors.right.isDown || controls.rightFlag) && this.player.x < 9600) {
       if (playerUp) {
         this.moveDiagonalRight(speed);
         this.player.anims.play('right', true);
@@ -75,8 +75,8 @@ export default class Player {
     this.player.setVelocityX(-speed);
     this.player.setVelocityY(-speed);
   }
-  jump(cursors, playerUp, playerDown) {
-    if (cursors.up.isDown && (playerDown || playerUp)) {
+  jump(cursors, controls, playerUp, playerDown) {
+    if ((cursors.up.isDown || controls.upFlag) && (playerDown || playerUp)) {
       this.isJumping = true;
       this.momentY = this.player.y;
     }
