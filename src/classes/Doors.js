@@ -1,24 +1,24 @@
 export default class Doors {
   constructor(scene) {
-    this.coordinates = [];
-    this.doorsGroup = scene.physics.add.group();
-    this.createGroup = this.createGroup.bind(this);
+    this.scene = scene;
   }
-  getCoordinates(coordinates) {
-    this.coordinates.push(coordinates);
-    return this.coordinates;
+  preloadDoor() {
+    this.scene.load.image('door', 'assets/images/door.png');
   }
-  createGroup(scene, player, callback) {
-    this.doorsGroup = this.coordinates
-      .map(([x, y], i) =>
-        this.doorsGroup
-          .create(x, y - 200, 'door')
-          .setOrigin(0, 0)
-          .setData('index', `${i + 1}`)
-      )
-      .map((door) => {
-        scene.physics.add.overlap(player, door, callback, null, this);
-        return door;
-      });
+  createDoor() {
+    this.sprite = this.scene.physics.add.sprite(9200, 500, 'door').setSize(128, 150);
+  }
+  addOverlap(player, callback) {
+    this.scene.physics.add.overlap(
+      player,
+      this.sprite,
+      () => {
+        this.scene.scene.pause();
+        this.scene.scene.launch('level-completed');
+        callback();
+      },
+      null,
+      this.scene
+    );
   }
 }

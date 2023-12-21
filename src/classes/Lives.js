@@ -1,4 +1,4 @@
-import { heartsIndex } from '../utils/variables';
+import { heartsIndex } from '../utils/hearts';
 export default class Lives {
   constructor(scene, x = 760, y = 50) {
     this.scene = scene;
@@ -12,11 +12,12 @@ export default class Lives {
     anims.create({
       key: 'disappear',
       frames: anims.generateFrameNumbers('heart', { start: 0, end: 1 }),
-      frameRate: 10,
-      repeat: 10,
+      frameRate: 15,
+      repeat: 4,
     });
   }
   lose(i) {
+    console.log(this.heartsImages[i]);
     this.heartsImages[i].anims.play('disappear', false);
     heartsIndex.hearts[i] = 'blackHeart';
   }

@@ -2,7 +2,7 @@ export default class Checkpoints {
   constructor(scene) {
     this.coordinates = [];
     this.checkpointsGroup = scene.physics.add.group();
-    //this.playerX = null;
+    this.playerX = null;
     this.createGroup = this.createGroup.bind(this);
   }
   getCoordinates(coordinates) {
@@ -19,7 +19,16 @@ export default class Checkpoints {
         return checkpoint;
       })
       .map((checkpoint) => {
-        scene.physics.add.overlap(player, checkpoint, callback, null, this);
+        scene.physics.add.overlap(
+          player,
+          checkpoint,
+          () => {
+            callback(player, checkpoint);
+            scene.physics.world.disable(checkpoint);
+          },
+          null,
+          this
+        );
         return checkpoint;
       });
   }

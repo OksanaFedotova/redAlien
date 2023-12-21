@@ -1,6 +1,6 @@
 // import Phaser from 'phaser';
 
-export class Button {
+export default class Button {
   constructor(x, y, inner, scene, callback, name, stars) {
     let image;
     this.stars = [];

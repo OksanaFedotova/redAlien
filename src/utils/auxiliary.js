@@ -36,6 +36,7 @@ export function getRandomArbitrary(min, max) {
 
 export function getSlopes(array) {
   let inner = [];
+  console.log(array);
   return array
     .map((line, i, arr) => {
       if (arr[i + 1]) {
@@ -43,6 +44,8 @@ export function getSlopes(array) {
           inner.push(line);
           inner.push(arr[i + 1]);
         } else if (line.x2 !== arr[i + 1].x1) {
+          console.log(inner)
+        //  if (inner[0].x1 && inner[0].y1 && inner[inner.length - 1].x2 && inner[inner.length - 1].y2) {
           const newLine = new Phaser.Geom.Line(
             inner[0].x1,
             inner[0].y1,
@@ -51,6 +54,7 @@ export function getSlopes(array) {
           );
           inner = [];
           return newLine;
+         // }
         }
       } else {
         if (inner.length) {

@@ -1,6 +1,7 @@
 export default class Player {
   constructor(scene, x, y, img) {
     this.player = scene.physics.add.sprite(x, y, img).setScale(0.5, 0.5);
+    //this.deadPlayer = scene.physics.add.sprite(x, y, img).setScale(0.5, 0.5);
     //this.player.setBounce(0.2);
 
     scene.anims.create({
@@ -12,11 +13,17 @@ export default class Player {
     scene.anims.create({
       key: 'turn',
       frames: [{ key: img, frame: 9 }],
-      frameRate: 10,
+     // frameRate: 10,
     });
     scene.anims.create({
       key: 'right',
       frames: scene.anims.generateFrameNumbers(img, { start: 10, end: 18 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+    scene.anims.create({
+      key: 'blinking',
+      frames: scene.anims.generateFrameNumbers(img, {start: 20, end: 21}),
       frameRate: 10,
       repeat: -1,
     });
@@ -25,10 +32,11 @@ export default class Player {
     this.isOnTheSlope = false;
     this.isFalling = false;
   }
-  move(cursors, controls, playerUp, playerDown, speed) {
-    if (playerUp || playerDown) {
-      this.player.body.allowGravity = false;
-    }
+  move(cursors, controls, playerUp, playerDown, speed, gameOverFlag) {
+    if (!gameOverFlag) return;
+      if (playerUp || playerDown) {
+        this.player.body.allowGravity = false;
+      }
     if ((cursors.left.isDown || controls.leftFlag) && this.player.x > 0) {
       if (playerUp) {
         this.moveDiagonalLeft(speed);
@@ -56,7 +64,7 @@ export default class Player {
       if (playerUp || playerDown) {
         this.player.body.stop();
       }
-      this.player.anims.play('turn');
+      this.player.play({key: 'turn', repeat: -1});
     }
   }
   moveDiagonalRight(speed) {
@@ -87,5 +95,8 @@ export default class Player {
     if (this.isJumping) {
       this.player.setVelocityY(-450);
     }
+  }
+  playBlinking() {
+    this.player.play('blinking', true);
   }
 }

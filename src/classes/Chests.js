@@ -1,4 +1,5 @@
 import { Stars } from './Stars';
+import results from '../utils/results';
 
 export default class Chests {
   constructor(scene) {
@@ -63,5 +64,7 @@ export default class Chests {
     this.scene.physics.add.overlap(player, star.star, star.take, null, this);
     chest.setActive(false);
     this.scene.physics.world.disable(chest);
+    results.stars++;
+    console.log(results);
   }
 }

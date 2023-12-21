@@ -1,31 +1,28 @@
 import Phaser from 'phaser';
 export default class Sounds {
   constructor(scene) {
+    this.scene = scene;
     this.isRunning = false;
     this.isFlying = true;
     this.isFlyingOnSlope = true;
-    this.scene = scene;
     this.river = true;
     this.jumps = 0;
+    this.stopRun = this.stopRun.bind(this);
   }
   preloadSound() {
     this.scene.load.audio('run', 'assets/audio/run.mp3');
-    // this.scene.load.audio('fly', 'assets/audio/fly.mp3');
     this.scene.load.audio('jump', 'assets/audio/jump.mp3');
     this.scene.load.audio('river', 'assets/audio/river.mp3');
     this.scene.load.audio('background', 'assets/audio/background.mp3');
     this.scene.load.audio('gurgle', 'assets/audio/gurgle.mp3');
     this.scene.load.audio('hit', 'assets/audio/hit.mp3');
+    this.scene.load.audio('checkpoint', 'assets/audio/checkpoint.wav');
   }
   createSound() {
     this.runSound = this.scene.sound.add('run', {
       volume: 1,
       loop: true,
     });
-    // this.flySound = this.scene.sound.add('fly', {
-    //   volume: 1,
-    //   loop: true,
-    // });
     this.jumpSound = this.scene.sound.add('jump', {
       volume: 0.6,
       loop: false,
@@ -46,33 +43,64 @@ export default class Sounds {
       volume: 1,
       loop: false,
     });
+    this.checkpointSound = this.scene.sound.add('checkpoint', {
+      volume: 1,
+      loop: false,
+    });
   }
-  playRiver(isRiver) {
-    if (isRiver) {
-      if (this.river) {
-        this.riverSound.play();
-        this.river = false;
-      }
-    } else if (!isRiver) {
-      this.riverSound.stop();
-      if (!isRiver) {
-        this.river = true;
+  playRiver(isRiver, stopSound) {
+    if (stopSound) {
+      this.riverSound.stop()
+    } else {
+      if (isRiver) {
+        if (this.river) {
+          this.riverSound.play();
+          this.river = false;
+        }
+      } else if (!isRiver) {
+        this.riverSound.stop();
+        if (!isRiver) {
+          this.river = true;
+        }
       }
     }
   }
-  playGurgle() {
-    this.gurgleSound.play();
+  playGurgle(stopSound) {
+     if (stopSound) {
+    this.gurgleSound.stop();
+     } else {
+      this.gurgleSound.play();
+     }
   }
-  playBackground() {
-    this.backgroundSound.play();
+  playBackground(stopSound) {
+     if (stopSound) {
+    this.backgroundSound.stop();
+     } else {
+      this.backgroundSound.play();
+     }
   }
-  playHit() {
-    this.hitSound.play();
+  playHit(stopSound, flag) {
+     if (stopSound) {
+    this.hitSound.stop();
+     } else {
+      if (!flag) this.hitSound.play();
+      flag = true;
+     }
   }
-  updateSound(cursors, player, playerDown, playerUp, slopeCurrent, isJumping) {
+  playCheckpoint(stopSound) {
+    if (stopSound) {
+      this.checkpointSound.stop()
+    } else {
+      this.checkpointSound.play()
+    }
+  }
+  updateSound(cursors, player, playerDown, playerUp, slopeCurrent, isJumping, stopSound) {
+    if (stopSound) this.scene.game.sound.stopAll();
     if (player.body.onFloor() && this.isFlying === true) {
+    if (!stopSound) {
       this.jumpSound.play();
       this.isFlying = false;
+    }
     }
     if (!player.body.onFloor()) {
       this.jumpSound.stop();
@@ -84,29 +112,10 @@ export default class Sounds {
         Phaser.Geom.Intersects.GetLineToRectangle(slopeCurrent, player.getBounds()).length &&
         this.isFlyingOnSlope
       ) {
-        this.jumpSound.play();
-        this.isFlyingOnSlope = false;
-        // console.log(Phaser.Geom.Intersects.GetLineToRectangle(slopeCurrent, player.getBounds()));
-        // const { y } = Phaser.Geom.Intersects.GetLineToRectangle(slopeCurrent, player.getBounds())[0];
-        // if (cursors.up.isDown) {
-        //   this.isFlyingOnSlope = true;
-        // }
-        // if (this.isFlyingOnSlope) {
-        //   if (cursors.up.isUp) {
-        //     this.jumpSound.play();
-        //     this.isFlyingOnSlope = false;
-        //   } else {
-        //     this.jumps++;
-        //     if (this.jumps % 3 === 0) {
-        //       if (cursors.right.isDown || cursors.left.isDown) {
-        //         this.jumpSound.play();
-        //         this.isFlyingOnSlope = false;
-        //       } else {
-        //         this.jumpSound.play();
-        //       }
-        //     }
-        //   }
-        // }
+        if (!stopSound) {
+          this.jumpSound.play();
+          this.isFlyingOnSlope = false;
+        }
       }
       if (isJumping) this.isFlyingOnSlope = true;
     }
@@ -114,14 +123,17 @@ export default class Sounds {
       (cursors.right.isDown || cursors.left.isDown) && player.body.onFloor(),
       (cursors.right.isDown || cursors.left.isDown) && (playerDown || playerUp),
     ];
-    if (playerRun[0] || playerRun[1]) {
-      if (!this.isRunning) {
-        this.runSound.play();
-        this.isRunning = true;
+      if (playerRun[0] || playerRun[1]) {
+        if (!this.isRunning) {
+          this.runSound.play();
+          this.isRunning = true;
+        }
+      } else {
+        this.runSound.stop();
+        this.isRunning = false;
       }
-    } else {
-      this.runSound.stop();
-      this.isRunning = false;
-    }
+  }
+  stopRun() {
+    this.runSound.stop();
   }
 }
