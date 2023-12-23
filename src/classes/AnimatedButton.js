@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 
 export default class AnimatedButton {
   constructor({ x, y }, imageSrc, { label, style }, scene, { callback1, callback2, flag }) {
-    const text = scene.add.text(0, 30, label, style).setOrigin(0.5, 0.5);
+    const text = scene.add.text(0, 40, label, style).setOrigin(0.5, 0.5);
     const image = scene.add.sprite(0, 0, imageSrc).setScale(0.2, 0.2);
     scene.add
       .container(x, y, [image, text])

@@ -5,6 +5,7 @@ import style from '../utils/style';
 import SimpleButton from '../classes/SimpleButton';
 import AnimatedButton from '../classes/AnimatedButton';
 import data from '../utils/data';
+import getMap from '../utils/getMap';
 
 let stopSound = false;
 
@@ -22,11 +23,12 @@ export default class Menu extends Phaser.Scene {
       frameHeight: 256,
     });
     this.load.image('share', 'assets/images/share.png');
-    this.screenWidth = this.cameras.main.width;
-    this.screenHeight = this.cameras.main.height;
+    this.load.image('map', 'assets/images/menu2.png');
   }
 
   create() {
+    this.screenWidth = this.cameras.main.width;
+    this.screenHeight = this.cameras.main.height;
     this.cameras.main.setBackgroundColor('rgba(0,0,0,0.8)');
     const resume = () => {
       this.scene.resume('game-scene');
@@ -42,7 +44,6 @@ export default class Menu extends Phaser.Scene {
       resume,
       'close',
       0.15,
-      35
     );
 
     // all sounds
@@ -57,7 +58,7 @@ export default class Menu extends Phaser.Scene {
       return false;
     };
     this.soundsButton = new AnimatedButton(
-      { x: this.screenWidth * 0.47, y: this.screenHeight * 0.4 },
+      { x: this.screenWidth * 0.47, y: this.screenHeight * 0.3 },
       'sound',
       { label: 'выключить звук', style: this.styleText },
       this,
@@ -81,14 +82,25 @@ export default class Menu extends Phaser.Scene {
     };
     this.shareButton = new SimpleButton(
       this.screenWidth * 0.47,
-      this.screenHeight * 0.6,
+      this.screenHeight * 0.5,
       'поделиться',
       this.styleText,
       this,
       share,
       'share',
       0.1,
-      35
+      40
+    );
+    this.mapButton = new SimpleButton(
+      this.screenWidth * 0.47,
+      this.screenHeight * 0.7,
+      'карта',
+      this.styleText,
+      this,
+      () => getMap(this.scene),
+      'map',
+      0.1,
+      40
     );
   }
 }

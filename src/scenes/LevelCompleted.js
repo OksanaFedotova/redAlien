@@ -24,7 +24,6 @@ export default class LevelCompleted extends Phaser.Scene {
     this.load.image('ribbon', 'assets/images/ribbon.png');
   }
   create() {
-    //console.log(results, this);
     const x = this.cameras.main.width / 2;
     const y = this.cameras.main.height / 2;
     this.add.image(x, y, 'completed');
@@ -33,10 +32,9 @@ export default class LevelCompleted extends Phaser.Scene {
       ...style,
       color: '#fcfff2',
     });
-    //.setShadow(3, 3, '#98FB98');
 
     for (let i = 0; i < 3; i++) {
-      const texture = i < results.stars ? 'star-img' : 'empty';
+      const texture = i < results[data.level - 1].stars ? 'star-img' : 'empty';
       const star = this.add.image(x - 50 + i * 55, y - 200, texture);
       this.tweens.add({
         targets: star,
@@ -48,11 +46,10 @@ export default class LevelCompleted extends Phaser.Scene {
     }
     this.add.text(x - 75, y - 20, 'Счёт:', style);
     const score = this.add.text(x + 45, y - 18, '0', { ...style, color: '#ffffff' }); //#54bb0e
-    //.setOrigin(0.5, 0.5);
 
     this.tweens.addCounter({
       from: 0,
-      to: results.score,
+      to: results[data.level - 1].score,
       duration: 1500,
       ease: 'linear',
       onUpdate: (tween) => {
@@ -71,10 +68,18 @@ export default class LevelCompleted extends Phaser.Scene {
       .setScale(0.7, 0.7)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
-        data.level++
+        data.level++;
+        results.push({stars: 0, score: 0})
         resume(this.scene);
       });
 
-    this.add.image(x + 130, y + 115, 'levels').setScale(0.7, 0.7);
+    this.add
+      .image(x + 130, y + 115, 'levels')
+      .setScale(0.7, 0.7)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerdown', () => {
+          this.scene.start('level-select');
+          this.scene.stop();
+      });
   }
 }

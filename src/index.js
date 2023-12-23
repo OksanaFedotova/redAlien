@@ -21,7 +21,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [GameScene, LevelCompleted, GameOver, LevelSelect, Menu],
+  scene: [LevelSelect, GameScene, LevelCompleted, GameOver, Menu],
 };
 
 export default new Phaser.Game(config);

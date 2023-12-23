@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import Sky from '../classes/nature/Sky';
 import Clouds from '../classes/nature/Clouds';
-import { Button } from '../classes/Button';
+import Button from '../classes/Button';
 import { getData } from '../utils/vk';
+import results from '../utils/results';
+import style from '../utils/style';
+import data from '../utils/data';
 
-const style = { fontFamily: 'Bulito', fontSize: '64px', color: '#38a5c6', align: 'center' };
 export default class LevelSelect extends Phaser.Scene {
   constructor() {
     super('level-select');
@@ -16,10 +18,10 @@ export default class LevelSelect extends Phaser.Scene {
     this.load.image('cloud', 'assets/images/Cloud_1.png');
     this.load.image('cloud2', 'assets/images/Cloud_2.png');
     //levels
-    //levels.forEach((i) =>  this.load.image(`level`, `assets/ui/level.png`))
     this.load.image('level', 'assets/ui/level.png');
     this.load.image('lock', 'assets/images/lock.png');
     this.load.image('one-star', 'assets/images/one-star.png');
+    this.load.image('empty-star', 'assets/images/empty-star.png');
   }
   async create() {
     //level size
@@ -34,37 +36,39 @@ export default class LevelSelect extends Phaser.Scene {
     let y = this.cameras.main.height / 2 - 45; // высота контейнера / 8
     // eslint-disable-next-line no-unused-vars
     let stars = await getData(['stars']);
-    if (!stars.length)
-      stars = [
-        { level: 1, quantity: 3 },
-        { level: 2, quantity: 0 },
-      ];
-    for (let i = 1; i < stars.length + 1; i++) {
-      new Button(x, y, { name: i, style }, this, () => this.startGame(i), 'level', {
-        name: 'one-star',
-        quantity: stars[i - 1].quantity,
-      });
+    for (let i = 0; i < 6; i++) {
+      if (i < results.length || i == 0) {
+        new Button(
+            x,
+            y,
+            { name: i + 1, style },
+            this,
+            () => {
+              data.level = i + 1;
+              this.startGame();
+            },
+            'level',
+            {
+              name: 'one-star',
+              quantity: results[i]?.stars,
+            }
+          );
+      }
+      else {
+          new Button(x, y, { name: `lock`, img: true }, this, null, 'level');
+      }
       x += 100;
-      if (i % 3 === 0) {
+      if ((i + 1) % 3 === 0) {
         y += i * 40;
-        x -= i * 100;
+        x -= (i + 1) * 100;
       }
     }
-    for (let i = stars.length + 1; i < 7; i++) {
-      new Button(x, y, { name: `lock`, img: true }, this, () => this.startGame(i), 'level');
-      x += 100;
-      if (i % 3 === 0) {
-        y += i * 40;
-        x -= i * 100;
-      }
-    }
-    const textX = (this.cameras.main.width - 454) / 2;
-    this.add.text(textX, 16, 'Выбери уровень', style);
+    const textX = (this.cameras.main.width - 370) / 2;
+    this.add.text(textX, 50, 'Выбери уровень', style);
   }
 
-  update() {}
-  startGame(level) {
+  startGame() {
     this.scene.stop();
-    this.scene.start('game-scene', { level, sound: true });
+    this.scene.start('game-scene');
   }
 }

@@ -4,9 +4,10 @@ export default class Button {
   constructor(x, y, inner, scene, callback, name, stars) {
     let image;
     this.stars = [];
-    if (stars) {
-      for (let i = 0; i < stars.quantity; i++) {
-        this.stars.push(scene.add.image(-25 + i * 25, -55, stars.name).setScale(0.5, 0.5));
+    if (stars?.quantity) {
+      for (let i = 0; i < 3; i++) {
+        const name = stars.quantity <= i ? 'empty-star' : stars.name;
+        this.stars.push(scene.add.image(-25 + i * 25, -55, name).setScale(0.5, 0.5));
       }
     }
     if (inner.img) {
@@ -17,6 +18,8 @@ export default class Button {
     if (name) image = scene.add.image(0, 0, name).setScale(0.3, 0.3);
     const container = this.stars ? [image, this.inner, ...this.stars] : [image, this.inner];
     scene.add.container(x, y, container);
-    image.setInteractive().on('pointerdown', () => callback());
+    if (inner.name !== 'lock') {
+      image.setInteractive({ useHandCursor: true }).on('pointerdown', () => callback());
+    }
   }
 }

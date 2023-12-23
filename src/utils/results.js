@@ -1,5 +1,2 @@
-const results = {
-  stars: 0,
-  score: 0,
-};
+const results = [];
 export default results;

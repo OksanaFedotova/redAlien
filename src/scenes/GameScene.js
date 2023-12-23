@@ -10,8 +10,6 @@ import Chests from '../classes/Chests';
 import Enemies from '../classes/Enemies';
 import Coins from '../classes/Coins';
 import Checkpoints from '../classes/Checkpoints';
-//import { superPower } from '../classes/Stars';
-// import { select } from '../utils/levels';
 import { heartsIndex } from '../utils/hearts';
 import Player from '../classes/Player';
 import Sounds from '../classes/Sounds';
@@ -39,8 +37,8 @@ let stopSound = false;
 
 function collectCoins(player, coin) {
   coin.destroy();
-  results.score += 10;
-  scoreText.setText('счёт: ' + results.score);
+  results[data.level - 1].score += 10;
+  scoreText.setText('счёт: ' + results[data.level - 1].score);
   coins.coinsSound.play();
 }
 function setPlayerX(player, checkpoint) {
@@ -55,6 +53,9 @@ export default class GameScene extends Phaser.Scene {
     this.getMenu = this.getMenu.bind(this);
   }
   init() {
+    if (!results.length) {
+      results.push({ stars: 0, score: 0 });
+    }
     this.level = data.level || 1;
     if (data.playerX) playerX = data.playerX;
    // this.stopSound = data.stopSound;
@@ -135,7 +136,6 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-  
     gameOverFlag = true;
 
     //sound
@@ -285,7 +285,7 @@ export default class GameScene extends Phaser.Scene {
     });
     //score
     scoreText = this.add
-      .text(16, 16, `счёт: ${results.score}`, { ...style, color: '#07b6eb' })
+      .text(16, 16, `счёт: ${results[data.level - 1].score}`, { ...style, color: '#07b6eb' })
       .setScrollFactor(0, 0)
       .setShadow(2, 2, '#d2f2fc');
 
