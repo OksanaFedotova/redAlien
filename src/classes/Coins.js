@@ -4,11 +4,11 @@ export default class Coins {
     this.scene = scene;
   }
   preloadCoins() {
-    this.scene.load.spritesheet('coin', 'assets/images/coin.png', {
+    this.scene.load.spritesheet('coin', '/assets/images/coin.png', {
       frameWidth: 67,
       frameHeight: 66,
     });
-    this.scene.load.audio('coins', 'assets/audio/coin2.mp3');
+    this.scene.load.audio('coins', '/assets/audio/coin2.mp3');
   }
   createCoins() {
     this.scene.anims.create({

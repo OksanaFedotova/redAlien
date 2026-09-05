@@ -13,15 +13,15 @@ export default class LevelSelect extends Phaser.Scene {
   }
   preload() {
     //sky
-    this.load.image('sky', 'assets/images/Sky.png');
+    this.load.image('sky', '/assets/images/Sky.png');
     //cloud
-    this.load.image('cloud', 'assets/images/Cloud_1.png');
-    this.load.image('cloud2', 'assets/images/Cloud_2.png');
+    this.load.image('cloud', '/assets/images/Cloud_1.png');
+    this.load.image('cloud2', '/assets/images/Cloud_2.png');
     //levels
-    this.load.image('level', 'assets/ui/level.png');
-    this.load.image('lock', 'assets/images/lock.png');
-    this.load.image('one-star', 'assets/images/one-star.png');
-    this.load.image('empty-star', 'assets/images/empty-star.png');
+    this.load.image('level', '/assets/ui/level.png');
+    this.load.image('lock', '/assets/images/lock.png');
+    this.load.image('one-star', '/assets/images/one-star.png');
+    this.load.image('empty-star', '/assets/images/empty-star.png');
   }
   async create() {
     //level size

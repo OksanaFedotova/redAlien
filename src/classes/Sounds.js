@@ -10,13 +10,13 @@ export default class Sounds {
     this.stopRun = this.stopRun.bind(this);
   }
   preloadSound() {
-    this.scene.load.audio('run', 'assets/audio/run.mp3');
-    this.scene.load.audio('jump', 'assets/audio/jump.mp3');
-    this.scene.load.audio('river', 'assets/audio/river.mp3');
-    this.scene.load.audio('background', 'assets/audio/background.mp3');
-    this.scene.load.audio('gurgle', 'assets/audio/gurgle.mp3');
-    this.scene.load.audio('hit', 'assets/audio/hit.mp3');
-    this.scene.load.audio('checkpoint', 'assets/audio/checkpoint.wav');
+    this.scene.load.audio('run', '/assets/audio/run.mp3');
+    this.scene.load.audio('jump', '/assets/audio/jump.mp3');
+    this.scene.load.audio('river', '/assets/audio/river.mp3');
+    this.scene.load.audio('background', '/assets/audio/background.mp3');
+    this.scene.load.audio('gurgle', '/assets/audio/gurgle.mp3');
+    this.scene.load.audio('hit', '/assets/audio/hit.mp3');
+    this.scene.load.audio('checkpoint', '/assets/audio/checkpoint.wav');
   }
   createSound() {
     this.runSound = this.scene.sound.add('run', {

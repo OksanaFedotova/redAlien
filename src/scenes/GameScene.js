@@ -58,6 +58,7 @@ export default class GameScene extends Phaser.Scene {
     }
     this.level = data.level || 1;
     if (data.playerX) playerX = data.playerX;
+    console.log('init', this.level, playerX);
    // this.stopSound = data.stopSound;
   }
   preload() {
@@ -75,54 +76,54 @@ export default class GameScene extends Phaser.Scene {
     coins.preloadCoins();
 
     //sky
-    this.load.image('sky', 'assets/images/Sky.png');
+    this.load.image('sky', '/assets/images/sky.png');
     //cloud
-    this.load.image('cloud', 'assets/images/Cloud_1.png');
-    this.load.image('cloud2', 'assets/images/Cloud_2.png');
+    this.load.image('cloud', '/assets/images/Cloud_1.png');
+    this.load.image('cloud2', '/assets/images/Cloud_2.png');
     //player
-    this.load.spritesheet('dude', 'assets/images/fox.png', {
+    this.load.spritesheet('dude', '/assets/images/fox.png', {
       frameWidth: 216,
       frameHeight: 185,
     });
     //hills
-    this.load.image('hill', 'assets/images/Hills_1.png');
-    this.load.image('hill2', 'assets/images/Hills_2.png');
+    this.load.image('hill', '/assets/images/Hills_1.png');
+    this.load.image('hill2', '/assets/images/Hills_2.png');
     //mountain
     for (let i = 0; i < 4; i++) {
-      this.load.image(`mountain${i}`, `assets/images/Mountain_${i + 1}.png`);
+      this.load.image(`mountain${i}`, `/assets/images/Mountain_${i + 1}.png`);
     }
     //heart
-    this.load.spritesheet('heart', 'assets/images/hearts.png', {
+    this.load.spritesheet('heart', '/assets/images/hearts.png', {
       frameWidth: 30,
       frameHeight: 26,
     });
-    this.load.image('blackHeart', 'assets/images/blackHeart.png');
+    this.load.image('blackHeart', '/assets/images/blackHeart.png');
 
     //environment
-    this.load.image('tree', 'assets/images/environment/tree.png');
-    this.load.image('grass1', 'assets/images/environment/grass1.png');
+    this.load.image('tree', '/assets/images/environment/tree.png');
+    this.load.image('grass1', '/assets/images/environment/grass1.png');
 
     //enemy
-    this.load.image('enemy', 'assets/images/enemy.png');
+    this.load.image('enemy', '/assets/images/enemy.png');
 
     //checkpoint
-    this.load.image('checkpoint', 'assets/images/checkpoint.png');
+    this.load.image('checkpoint', '/assets/images/checkpoint.png');
 
     //door
     this.door = new Doors(this);
     this.door.preloadDoor();
 
     // map made with Tiled in JSON format
-    this.load.tilemapTiledJSON(`level_${this.level}`, `assets/level_${this.level}.json`);
-    // this.load.tilemapTiledJSON(`choose_level`, `level_1.json`);
-    // tiles in spritesheet
-    // this.load.image('tiles', 'assets/tiles.png');
-    this.load.image('dirt', 'assets/tiles/dirt.png');
-    this.load.image('grass', 'assets/tiles/grass.png');
-    this.load.image('grassCliff', 'assets/tiles/grassCliff.png');
-    this.load.image('hills', 'assets/tiles/hills.png');
-    this.load.image('water', 'assets/tiles/water.png');
-    this.load.image('special', 'assets/tiles/special.png');
+   this.load.tilemapTiledJSON(`level_1`, `/assets/level_1.json`);
+    //this.load.tilemapTiledJSON(`choose_level`, `level_1.json`);
+    // tiles in spritesheet;
+
+    this.load.image('dirt', '/assets/tiles/dirt.png');
+    this.load.image('grass', '/assets/tiles/grass.png');
+    this.load.image('grassCliff', '/assets/tiles/grassCliff.png');
+    this.load.image('hills', '/assets/tiles/hills.png');
+    this.load.image('water', '/assets/tiles/water.png');
+    this.load.image('special', '/assets/tiles/special.png');
 
     //plugin for animation
     this.load.scenePlugin(
@@ -132,10 +133,10 @@ export default class GameScene extends Phaser.Scene {
       'animatedTiles'
     );
 
-    this.load.image('menu', 'assets/images/menu.png');
+    this.load.image('menu', '/assets/images/menu.png');
   }
 
-  create() {
+   create() {
     gameOverFlag = true;
 
     //sound
@@ -210,7 +211,7 @@ export default class GameScene extends Phaser.Scene {
             yRight = tile.pixelY;
             slopeRight = new Phaser.Geom.Line(xRight, yRight, xRight + 128, yRight + 128);
             rightSlopes.push(slopeRight);
-          //this.graphics.strokeLineShape(slopeRight);
+          this.graphics.strokeLineShape(slopeRight);
         }
       }
       //special tiles

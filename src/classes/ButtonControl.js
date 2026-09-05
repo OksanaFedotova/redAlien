@@ -9,9 +9,9 @@ export default class ButtonControl {
     this.upFlag = false;
   }
   preloadControl() {
-    this.scene.load.image('left', 'assets/images/left.png');
-    this.scene.load.image('right', 'assets/images/right.png');
-    this.scene.load.image('up', 'assets/images/up.png');
+    this.scene.load.image('left', '/assets/images/left.png');
+    this.scene.load.image('right', '/assets/images/right.png');
+    this.scene.load.image('up', '/assets/images/up.png');
   }
   createControl() {
     this.left = this.scene.add

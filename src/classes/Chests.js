@@ -12,19 +12,19 @@ export default class Chests {
   }
   preloadChests() {
     //chest
-    this.scene.load.spritesheet('chest', 'assets/images/chest.png', {
+    this.scene.load.spritesheet('chest', '/assets/images/chest.png', {
       frameWidth: 128,
       frameHeight: 153,
     });
     //stars
     for (let i = 0; i < 4; i++) {
-      this.scene.load.spritesheet('star', 'assets/images/star.png', {
+      this.scene.load.spritesheet('star', '/assets/images/star.png', {
         frameWidth: 124,
         frameHeight: 124,
       });
     }
-    this.scene.load.audio('chest', 'assets/audio/chest.mp3');
-    this.scene.load.audio('star', 'assets/audio/star.mp3');
+    this.scene.load.audio('chest', '/assets/audio/chest.mp3');
+    this.scene.load.audio('star', '/assets/audio/star.mp3');
   }
   getCoordinates(coordinates) {
     this.coordinates.push(coordinates);

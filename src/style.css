@@ -8,4 +8,6 @@
 }
 div {
   font-family: 'Vag';
+  height: 0;
+  opacity: 0;
 }

@@ -1,7 +1,7 @@
 // import bridge from '@vkontakte/vk-bridge';
 import bridge from '@vkontakte/vk-bridge-mock';
 
-bridge.send('VKWebAppInit', {});
+//bridge.send('VKWebAppInit', {});
 
 const setData = (key, value) => {
   const strValue = JSON.stringify(value);
@@ -19,7 +19,7 @@ const setData = (key, value) => {
   }
 };
 const getData = async (keys) => {
-  return (await bridge.send('VKWebAppStorageGet', { keys })).keys;
+ // return (await bridge.send('VKWebAppStorageGet', { keys })).keys;
   // bridge
   //   .send('VKWebAppStorageGet', {
   //     keys,

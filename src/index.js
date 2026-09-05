@@ -4,8 +4,12 @@ import GameOver from './scenes/GameOver';
 import LevelSelect from './scenes/LevelSelect';
 import LevelCompleted from './scenes/LevelCompleted';
 import Menu from './scenes/Menu';
+
+console.log(window.global)
+
 //import { level } from './levels';
 //const iframe = document.getElementsByTagName('iframe');
+
 const config = {
   type: Phaser.AUTO,
   scale: {
@@ -21,7 +25,8 @@ const config = {
       debug: false,
     },
   },
-  scene: [LevelSelect, GameScene, LevelCompleted, GameOver, Menu],
+  scene: [GameScene, LevelSelect, LevelCompleted, GameOver, Menu],
 };
 
 export default new Phaser.Game(config);
+

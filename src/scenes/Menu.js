@@ -16,14 +16,14 @@ export default class Menu extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('close', 'assets/images/close.png');
-    this.load.audio('theme', 'assets/audio/theme.mp3');
-    this.load.spritesheet('sound', 'assets/images/sound.png', {
+    this.load.image('close', '/assets/images/close.png');
+    this.load.audio('theme', '/assets/audio/theme.mp3');
+    this.load.spritesheet('sound', '/assets/images/sound.png', {
       frameWidth: 256,
       frameHeight: 256,
     });
-    this.load.image('share', 'assets/images/share.png');
-    this.load.image('map', 'assets/images/menu2.png');
+    this.load.image('share', '/assets/images/share.png');
+    this.load.image('map', '/assets/images/menu2.png');
   }
 
   create() {
@@ -67,7 +67,7 @@ export default class Menu extends Phaser.Scene {
 
     // share
     const share = () => {
-      bridge.send('VKWebAppShowInviteBox');
+      // bridge.send('VKWebAppShowInviteBox');
       // .then((data) => {
       //   if (data.success) {
       //     console.log('success', data.success);

@@ -8,7 +8,7 @@ export default class GameOver extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('retry', 'assets/images/button.png');
+    this.load.image('retry', '/assets/images/button.png');
   }
 
   create() {

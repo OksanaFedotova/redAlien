@@ -14,14 +14,14 @@ export default class LevelCompleted extends Phaser.Scene {
     // console.log(this.level, this.stopSound)
   }
   preload() {
-    this.load.image('completed', 'assets/images/back.png');
-    this.load.image('star-img', 'assets/images/star-img.png');
-    this.load.image('empty', 'assets/images/empty.png');
-    this.load.image('score', 'assets/images/button-score.png');
-    this.load.image('again', 'assets/images/again.png');
-    this.load.image('next', 'assets/images/ok.png');
-    this.load.image('levels', 'assets/images/levels.png');
-    this.load.image('ribbon', 'assets/images/ribbon.png');
+    this.load.image('completed', '/assets/images/back.png');
+    this.load.image('star-img', '/assets/images/star-img.png');
+    this.load.image('empty', '/assets/images/empty.png');
+    this.load.image('score', '/assets/images/button-score.png');
+    this.load.image('again', '/assets/images/again.png');
+    this.load.image('next', '/assets/images/ok.png');
+    this.load.image('levels', '/assets/images/levels.png');
+    this.load.image('ribbon', '/assets/images/ribbon.png');
   }
   create() {
     const x = this.cameras.main.width / 2;
