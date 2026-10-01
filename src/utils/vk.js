@@ -19,7 +19,7 @@ const setData = (key, value) => {
   }
 };
 const getData = async (keys) => {
- // return (await bridge.send('VKWebAppStorageGet', { keys })).keys;
+  // return (await bridge.send('VKWebAppStorageGet', { keys })).keys;
   // bridge
   //   .send('VKWebAppStorageGet', {
   //     keys,

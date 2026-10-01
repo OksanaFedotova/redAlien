@@ -7,7 +7,11 @@ export default class AnimatedButton {
     const image = scene.add.sprite(0, 0, imageSrc).setScale(0.2, 0.2);
     scene.add
       .container(x, y, [image, text])
-      .setInteractive(new Phaser.Geom.Rectangle(-50, -30, 100, 100), Phaser.Geom.Rectangle.Contains)
+      .setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(-50, -30, 100, 100),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+        useHandCursor: true,
+      })
       .on('pointerdown', () => {
         if (!flag) {
           image.anims.play('soundOn', false);

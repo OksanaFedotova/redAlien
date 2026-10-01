@@ -1,10 +1,10 @@
 @font-face {
   font-family: Bulito; /* Имя шрифта */
-  src: url('../assets/fonts/Bulito.ttf'); /* Путь к файлу со шрифтом */
+  src: url('/assets/fonts/Bulito.ttf'); /* Путь к файлу со шрифтом */
 }
 @font-face {
   font-family: Vag; /* Имя шрифта */
-  src: url('../assets/fonts/vag.ttf'); /* Путь к файлу со шрифтом */
+  src: url('/assets/fonts/vag.ttf'); /* Путь к файлу со шрифтом */
 }
 div {
   font-family: 'Vag';

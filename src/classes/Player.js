@@ -13,7 +13,7 @@ export default class Player {
     scene.anims.create({
       key: 'turn',
       frames: [{ key: img, frame: 9 }],
-     // frameRate: 10,
+      // frameRate: 10,
     });
     scene.anims.create({
       key: 'right',
@@ -23,7 +23,7 @@ export default class Player {
     });
     scene.anims.create({
       key: 'blinking',
-      frames: scene.anims.generateFrameNumbers(img, {start: 20, end: 21}),
+      frames: scene.anims.generateFrameNumbers(img, { start: 20, end: 21 }),
       frameRate: 10,
       repeat: -1,
     });
@@ -34,9 +34,9 @@ export default class Player {
   }
   move(cursors, controls, playerUp, playerDown, speed, gameOverFlag) {
     if (!gameOverFlag) return;
-      if (playerUp || playerDown) {
-        this.player.body.allowGravity = false;
-      }
+    if (playerUp || playerDown) {
+      this.player.body.allowGravity = false;
+    }
     if ((cursors.left.isDown || controls.leftFlag) && this.player.x > 0) {
       if (playerUp) {
         this.moveDiagonalLeft(speed);
@@ -64,7 +64,7 @@ export default class Player {
       if (playerUp || playerDown) {
         this.player.body.stop();
       }
-      this.player.play({key: 'turn', repeat: -1});
+      this.player.play({ key: 'turn', repeat: -1 });
     }
   }
   moveDiagonalRight(speed) {

@@ -35,26 +35,18 @@ export default class Menu extends Phaser.Scene {
       this.scene.pause();
       this.scene.setVisible(false, 'menu');
     };
-    new SimpleButton(
-      this.screenWidth - 60,
-      60,
-      null,
-      this.styleText,
-      this,
-      resume,
-      'close',
-      0.15,
-    );
+    new SimpleButton(this.screenWidth - 60, 60, null, this.styleText, this, resume, 'close', 0.15);
 
     // all sounds
 
     const soundPause = () => {
       data.stopSound = true;
-      this.game.sound.stopAll();
+      this.game.sound.pauseAll();
       return true;
     };
     const soundResume = () => {
       data.stopSound = false;
+      this.game.sound.resumeAll();
       return false;
     };
     this.soundsButton = new AnimatedButton(

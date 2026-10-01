@@ -35,39 +35,38 @@ export function getRandomArbitrary(min, max) {
 }
 
 export function getSlopes(array) {
+  const result = [];
   let inner = [];
-  console.log(array);
-  return array
-    .map((line, i, arr) => {
-      if (arr[i + 1]) {
-        if (line.x2 === arr[i + 1].x1) {
-          inner.push(line);
-          inner.push(arr[i + 1]);
-        } else if (line.x2 !== arr[i + 1].x1) {
-          console.log(inner)
-        //  if (inner[0].x1 && inner[0].y1 && inner[inner.length - 1].x2 && inner[inner.length - 1].y2) {
-          const newLine = new Phaser.Geom.Line(
-            inner[0].x1,
-            inner[0].y1,
-            inner[inner.length - 1].x2,
-            inner[inner.length - 1].y2
-          );
-          inner = [];
-          return newLine;
-         // }
-        }
-      } else {
-        if (inner.length) {
-          const newLine = new Phaser.Geom.Line(
-            inner[0].x1,
-            inner[0].y1,
-            inner[inner.length - 1].x2,
-            inner[inner.length - 1].y2
-          );
-          inner = [];
-          return newLine;
-        }
-      }
-    })
-    .filter((line) => line);
+
+  array.forEach((line, i) => {
+    inner.push(line);
+    const next = array[i + 1];
+    const chains = next && line.x2 === next.x1;
+
+    if (!chains) {
+      const first = inner[0];
+      const last = inner[inner.length - 1];
+      result.push(new Phaser.Geom.Line(first.x1, first.y1, last.x2, last.y2));
+      inner = [];
+    }
+  });
+
+  return result;
+}
+
+export function slopeYAt(slope, x) {
+  const t = Phaser.Math.Clamp((x - slope.x1) / (slope.x2 - slope.x1), 0, 1);
+  return slope.y1 + (slope.y2 - slope.y1) * t;
+}
+
+export function findSlopeAt(slopes, x) {
+  return slopes.find((s) => x >= Math.min(s.x1, s.x2) && x <= Math.max(s.x1, s.x2));
+}
+
+export function findSlopeOverlapping(slopes, body) {
+  return slopes.find((s) => {
+    const min = Math.min(s.x1, s.x2);
+    const max = Math.max(s.x1, s.x2);
+    return body.right > min && body.left < max;
+  });
 }

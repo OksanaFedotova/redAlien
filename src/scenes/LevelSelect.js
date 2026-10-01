@@ -13,7 +13,7 @@ export default class LevelSelect extends Phaser.Scene {
   }
   preload() {
     //sky
-    this.load.image('sky', '/assets/images/Sky.png');
+    this.load.image('sky', '/assets/images/sky.png');
     //cloud
     this.load.image('cloud', '/assets/images/Cloud_1.png');
     this.load.image('cloud2', '/assets/images/Cloud_2.png');
@@ -39,23 +39,22 @@ export default class LevelSelect extends Phaser.Scene {
     for (let i = 0; i < 6; i++) {
       if (i < results.length || i == 0) {
         new Button(
-            x,
-            y,
-            { name: i + 1, style },
-            this,
-            () => {
-              data.level = i + 1;
-              this.startGame();
-            },
-            'level',
-            {
-              name: 'one-star',
-              quantity: results[i]?.stars,
-            }
-          );
-      }
-      else {
-          new Button(x, y, { name: `lock`, img: true }, this, null, 'level');
+          x,
+          y,
+          { name: i + 1, style },
+          this,
+          () => {
+            data.level = i + 1;
+            this.startGame();
+          },
+          'level',
+          {
+            name: 'one-star',
+            quantity: results[i]?.stars,
+          }
+        );
+      } else {
+        new Button(x, y, { name: `lock`, img: true }, this, null, 'level');
       }
       x += 100;
       if ((i + 1) % 3 === 0) {

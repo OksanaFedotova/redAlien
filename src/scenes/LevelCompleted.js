@@ -69,7 +69,7 @@ export default class LevelCompleted extends Phaser.Scene {
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
         data.level++;
-        results.push({stars: 0, score: 0})
+        results.push({ stars: 0, score: 0 });
         resume(this.scene);
       });
 
@@ -78,8 +78,8 @@ export default class LevelCompleted extends Phaser.Scene {
       .setScale(0.7, 0.7)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
-          this.scene.start('level-select');
-          this.scene.stop();
+        this.scene.start('level-select');
+        this.scene.stop();
       });
   }
 }

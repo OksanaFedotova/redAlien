@@ -50,7 +50,7 @@ export default class Sounds {
   }
   playRiver(isRiver, stopSound) {
     if (stopSound) {
-      this.riverSound.stop()
+      this.riverSound.stop();
     } else {
       if (isRiver) {
         if (this.river) {
@@ -66,52 +66,50 @@ export default class Sounds {
     }
   }
   playGurgle(stopSound) {
-     if (stopSound) {
-    this.gurgleSound.stop();
-     } else {
+    if (stopSound) {
+      this.gurgleSound.stop();
+    } else {
       this.gurgleSound.play();
-     }
+    }
   }
   playBackground(stopSound) {
-     if (stopSound) {
-    this.backgroundSound.stop();
-     } else {
+    if (stopSound) {
+      this.backgroundSound.stop();
+    } else {
       this.backgroundSound.play();
-     }
+    }
   }
   playHit(stopSound, flag) {
-     if (stopSound) {
-    this.hitSound.stop();
-     } else {
+    if (stopSound) {
+      this.hitSound.stop();
+    } else {
       if (!flag) this.hitSound.play();
       flag = true;
-     }
+    }
   }
   playCheckpoint(stopSound) {
     if (stopSound) {
-      this.checkpointSound.stop()
+      this.checkpointSound.stop();
     } else {
-      this.checkpointSound.play()
+      this.checkpointSound.play();
     }
   }
-  updateSound(cursors, player, playerDown, playerUp, slopeCurrent, isJumping, stopSound) {
+  updateSound(cursors, player, playerUp, playerDown, isJumping, stopSound) {
     if (stopSound) this.scene.game.sound.stopAll();
+
     if (player.body.onFloor() && this.isFlying === true) {
-    if (!stopSound) {
-      this.jumpSound.play();
-      this.isFlying = false;
-    }
+      if (!stopSound) {
+        this.jumpSound.play();
+        this.isFlying = false;
+      }
     }
     if (!player.body.onFloor()) {
       this.jumpSound.stop();
       this.isFlying = true;
     }
+
     if (playerDown || playerUp) {
-      if (
-        !isJumping &&
-        Phaser.Geom.Intersects.GetLineToRectangle(slopeCurrent, player.getBounds()).length &&
-        this.isFlyingOnSlope
-      ) {
+      if (!isJumping && this.isFlyingOnSlope) {
         if (!stopSound) {
           this.jumpSound.play();
           this.isFlyingOnSlope = false;
@@ -119,19 +117,20 @@ export default class Sounds {
       }
       if (isJumping) this.isFlyingOnSlope = true;
     }
+
     const playerRun = [
       (cursors.right.isDown || cursors.left.isDown) && player.body.onFloor(),
       (cursors.right.isDown || cursors.left.isDown) && (playerDown || playerUp),
     ];
-      if (playerRun[0] || playerRun[1]) {
-        if (!this.isRunning) {
-          this.runSound.play();
-          this.isRunning = true;
-        }
-      } else {
-        this.runSound.stop();
-        this.isRunning = false;
+    if (playerRun[0] || playerRun[1]) {
+      if (!this.isRunning) {
+        this.runSound.play();
+        this.isRunning = true;
       }
+    } else {
+      this.runSound.stop();
+      this.isRunning = false;
+    }
   }
   stopRun() {
     this.runSound.stop();

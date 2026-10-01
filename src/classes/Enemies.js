@@ -11,11 +11,10 @@ export default class Enemies {
     return this.coordinates;
   }
   createGroup() {
-    this.enemies = this.coordinates
-      .map(([x, y]) => {
-        const enemy = this.enemiesGroup.create(x, y, 'enemy').setOrigin(0, 0);
-        return enemy;
-      })
+    this.enemies = this.coordinates.map(([x, y]) => {
+      const enemy = this.enemiesGroup.create(x, y, 'enemy').setOrigin(0, 0);
+      return enemy;
+    });
   }
   getOverlap(scene, player, callback) {
     this.enemies.map((enemy) => {

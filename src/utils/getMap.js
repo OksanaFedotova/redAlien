@@ -3,4 +3,4 @@ export default (scene) => {
   scene.stop('game-scene');
   scene.stop('menu');
   //this.scene.setVisible(false, 'menu');
-}
+};

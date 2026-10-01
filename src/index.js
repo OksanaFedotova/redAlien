@@ -5,8 +5,6 @@ import LevelSelect from './scenes/LevelSelect';
 import LevelCompleted from './scenes/LevelCompleted';
 import Menu from './scenes/Menu';
 
-console.log(window.global)
-
 //import { level } from './levels';
 //const iframe = document.getElementsByTagName('iframe');
 
@@ -25,8 +23,7 @@ const config = {
       debug: false,
     },
   },
-  scene: [GameScene, LevelSelect, LevelCompleted, GameOver, Menu],
+  scene: [LevelSelect, GameScene, LevelCompleted, GameOver, Menu],
 };
 
 export default new Phaser.Game(config);
-

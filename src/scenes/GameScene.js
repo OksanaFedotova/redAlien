@@ -1,5 +1,12 @@
 import Phaser from 'phaser';
-import { getRange, isClose, getSlopes } from '../utils/auxiliary';
+import {
+  getRange,
+  isClose,
+  getSlopes,
+  findSlopeAt,
+  slopeYAt,
+  findSlopeOverlapping,
+} from '../utils/auxiliary';
 import Enviroment from '../classes/nature/Enviroment';
 import Sky from '../classes/nature/Sky';
 import Clouds from '../classes/nature/Clouds';
@@ -32,6 +39,7 @@ let gameOverFlag;
 let scoreText;
 
 let playerX = 8800;
+const playerY = 300;
 
 let stopSound = false;
 
@@ -59,7 +67,7 @@ export default class GameScene extends Phaser.Scene {
     this.level = data.level || 1;
     if (data.playerX) playerX = data.playerX;
     console.log('init', this.level, playerX);
-   // this.stopSound = data.stopSound;
+    // this.stopSound = data.stopSound;
   }
   preload() {
     //controls
@@ -114,7 +122,7 @@ export default class GameScene extends Phaser.Scene {
     this.door.preloadDoor();
 
     // map made with Tiled in JSON format
-   this.load.tilemapTiledJSON(`level_1`, `/assets/level_1.json`);
+    this.load.tilemapTiledJSON(`level_11`, `/assets/level_11.json`);
     //this.load.tilemapTiledJSON(`choose_level`, `level_1.json`);
     // tiles in spritesheet;
 
@@ -136,7 +144,9 @@ export default class GameScene extends Phaser.Scene {
     this.load.image('menu', '/assets/images/menu.png');
   }
 
-   create() {
+  create() {
+    this.onSlope = false;
+
     gameOverFlag = true;
 
     //sound
@@ -158,7 +168,7 @@ export default class GameScene extends Phaser.Scene {
     new Mountains(this, 0, 300);
     new Hills(this, 0, 0, 'hill', 6);
     //map and tileset
-    const map = this.make.tilemap({ key: `level_${this.level}` });
+    const map = this.make.tilemap({ key: `level_11` });
     // const map = this.make.tilemap({ key: 'choose_level' });
 
     const dirtSet = map.addTilesetImage('dirt', 'dirt');
@@ -184,15 +194,15 @@ export default class GameScene extends Phaser.Scene {
     let coordinates = [];
     let collidedTiles = [];
     this.graphics = this.add.graphics({ lineStyle: { width: 0, color: 0xaa00aa } });
-    this.dangerousTiles = map.filterTiles((tile) => tile.properties.dangerous);
+    this.dangerousTiles = map.filterTiles((tile) => tile?.properties?.dangerous);
     ground.forEachTile((tile) => {
       //collided tiles
-      if (tile.properties.collides) {
+      if (tile?.properties?.collides) {
         collidedTiles.push([tile.pixelX, tile.pixelY]);
       }
 
       //dangerous tiles
-      else if (tile.properties.dangerous) {
+      else if (tile?.properties?.dangerous) {
         coordinates.push([tile.pixelX, tile.pixelY]);
       }
 
@@ -205,13 +215,21 @@ export default class GameScene extends Phaser.Scene {
             yLeft = tile.pixelY + 128;
             slopeLeft = new Phaser.Geom.Line(xLeft, yLeft, xLeft + 128, yLeft - 128);
             leftSlopes.push(slopeLeft);
+
+            // debug: отрисовка левого склона (красный)
+            this.graphics.lineStyle(2, 0xff0000, 1);
+            this.graphics.strokeLineShape(slopeLeft);
             break;
           case 'right':
             xRight = tile.pixelX;
             yRight = tile.pixelY;
             slopeRight = new Phaser.Geom.Line(xRight, yRight, xRight + 128, yRight + 128);
             rightSlopes.push(slopeRight);
-          this.graphics.strokeLineShape(slopeRight);
+
+            // debug: отрисовка правого склона (синий)
+            this.graphics.lineStyle(2, 0x0000ff, 1);
+            this.graphics.strokeLineShape(slopeRight);
+            break;
         }
       }
       //special tiles
@@ -226,7 +244,7 @@ export default class GameScene extends Phaser.Scene {
     this.leftSlopes.forEach((slopeLeft) => {
       this.graphics.strokeLineShape(slopeLeft);
       this.graphics.strokeLineShape(new Phaser.Geom.Line(slopeLeft));
-    })
+    });
     rightSlopes.sort((a, b) => a.x1 - b.x1);
     this.rightSlopes = getSlopes(rightSlopes);
 
@@ -249,13 +267,18 @@ export default class GameScene extends Phaser.Scene {
     this.door.createDoor();
     //enemies
     this.enemies = new Enemies(this);
+    const enemyPositions = [];
     if (map.getObjectLayer('enemies')) {
       const enemiesLayer = map.getObjectLayer('enemies');
-      enemiesLayer.objects.forEach((enemy) => this.enemies.getCoordinates([enemy.x, enemy.y]));
+      enemiesLayer.objects.forEach((enemy) => {
+        this.enemies.getCoordinates([enemy.x, enemy.y]);
+        enemyPositions.push([enemy.x, enemy.y]);
+      });
       this.enemies.createGroup();
     }
+
     //player
-    playerObj = new Player(this, playerX, 600, 'dude');
+    playerObj = new Player(this, playerX, 300, 'dude');
     player = playerObj.player;
     //checkpoints
     if (map.getObjectLayer('checkpoints')) {
@@ -268,7 +291,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     coins.createCoins();
-    coins.addCoins(collidedTiles, this, player, collectCoins);
+    coins.addCoins(collidedTiles, this, player, collectCoins, enemyPositions);
     //door
     this.door.addOverlap(player, () => sound.stopRun());
     //cursors
@@ -322,7 +345,7 @@ export default class GameScene extends Phaser.Scene {
       .sprite(730, 330, 'menu')
       .setScale(0.2)
       .setScrollFactor(0, 0)
-      .setInteractive()
+      .setInteractive({ useHandCursor: true })
       .on('pointerdown', this.getMenu);
 
     this.events.on('resume', () => {
@@ -336,72 +359,78 @@ export default class GameScene extends Phaser.Scene {
     player.body.allowGravity = true;
     if (player.body.onFloor()) playerObj.isFalling = false;
     if (player.y < 20) player.setVelocityY(450);
-
+    console.log(player.y);
     //движение на склонах
-    this.slopeCurrent = this.leftSlopes.filter((slope) =>
-      Phaser.Geom.Intersects.LineToRectangle(slope, player.getBounds())
-    );
-    if (this.slopeCurrent.length) {
-      const point = this.slopeCurrent[0].x1;
-      const end = this.slopeCurrent[0].x2;
-      if (player.x + 17 > point && player.x - 58 < end) {
-        playerUp = true;
-      } else if (player.x + 17 < point || player.x - 58 > end) {
-        playerUp = false;
+    const jumpPressed = Phaser.Input.Keyboard.JustDown(cursors.up) || this.controls.upFlag;
+    const wantsJump =
+      jumpPressed && !playerObj.isJumping && (player.body.onFloor() || this.onSlope);
+    const vx = player.body.velocity.x;
+
+    let leftSlope = null,
+      rightSlope = null;
+
+    if (!playerObj.isJumping) {
+      if (this.onSlope) {
+        const edgeX = vx < 0 ? player.body.left : vx > 0 ? player.body.right : player.body.center.x;
+        leftSlope = findSlopeAt(this.leftSlopes, edgeX);
+        rightSlope = findSlopeAt(this.rightSlopes, edgeX);
+      } else {
+        leftSlope = findSlopeOverlapping(this.leftSlopes, player.body);
+        rightSlope = findSlopeOverlapping(this.rightSlopes, player.body);
       }
-    } else if (!this.slopeCurrent.length) {
-      playerUp = false;
     }
-    if (playerObj.isJumping) {
+
+    const slope = leftSlope || rightSlope;
+    this.onSlope = !!slope;
+
+    if (slope && !wantsJump) {
+      const min = Math.min(slope.x1, slope.x2);
+      const max = Math.max(slope.x1, slope.x2);
+      const sampleX = Phaser.Math.Clamp(player.body.center.x, min, max);
+      const groundY = slopeYAt(slope, sampleX);
+      const targetY = groundY - player.body.halfHeight - player.body.offset.y;
+
+      player.body.allowGravity = false;
+      player.body.velocity.y = 0;
+      player.y = Phaser.Math.Linear(player.y, targetY, 0.6);
+
+      playerUp = !!leftSlope;
+      playerDown = !!rightSlope;
+    } else {
+      player.body.allowGravity = true;
       playerUp = false;
-    }
-    this.slopeCurrentRight = this.rightSlopes.filter((slope) =>
-      Phaser.Geom.Intersects.LineToRectangle(slope, player.getBounds())
-    );
-    if (this.slopeCurrentRight.length) {
-      const point = this.slopeCurrentRight[0].x1;
-      const end = this.slopeCurrentRight[0].x2;
-      if (player.x > point && player.x - 20 < end) {
-        playerDown = true;
-      } else if (player.x < point || player.x - 20 > end) {
-        playerDown = false;
-      }
-    } else if (!this.slopeCurrentRight.length) {
       playerDown = false;
     }
-    if (playerObj.isJumping) {
-      playerDown = false;
+
+    playerObj.move(cursors, this.controls, playerUp, playerDown, speed, gameOverFlag);
+
+    if (wantsJump) {
+      playerObj.isJumping = true;
+      player.setVelocityY(-400);
     }
-    //прыжки на склонах
-    if (playerObj.isFalling && (playerUp || playerDown)) {
-      if (!(cursors.up.isDown || this.controls.upFlag)) {
-        const line = this.slopeCurrent[0];
-        const line2 = this.slopeCurrentRight[0];
-        let intersection;
-        if (line) {
-          intersection = Phaser.Geom.Intersects.GetLineToRectangle(line, player.getBounds())[0].y;
-        } else if (line2) {
-          intersection = Phaser.Geom.Intersects.GetLineToRectangle(line2, player.getBounds())[0].y;
+
+    if (playerObj.isJumping && player.body.velocity.y >= 0) {
+      const testLeft = findSlopeOverlapping(this.leftSlopes, player.body);
+      const testRight = findSlopeOverlapping(this.rightSlopes, player.body);
+      const landingSlope = testLeft || testRight;
+
+      if (landingSlope) {
+        const min = Math.min(landingSlope.x1, landingSlope.x2);
+        const max = Math.max(landingSlope.x1, landingSlope.x2);
+        const sampleX = Phaser.Math.Clamp(player.body.center.x, min, max);
+        const groundY = slopeYAt(landingSlope, sampleX);
+        const targetY = groundY - player.body.halfHeight - player.body.offset.y;
+
+        if (player.y >= targetY) {
+          playerObj.isJumping = false;
         }
-        if (!(cursors.up.isDown || this.controls.upFlag)) {
-          if (line) {
-            player.y = intersection;
-            if (player.y - 10 < line.y2) player.y = line.y2 - 40;
-          } else if (line2) {
-            player.y = intersection - 20;
-            if (player.y - 10 < line2.y1) player.y = line2.y1 - 40;
-          }
-        }
-        playerObj.isFalling = false;
+      } else if (player.body.onFloor()) {
+        playerObj.isJumping = false;
       }
     }
     //moves
     playerObj.move(cursors, this.controls, playerUp, playerDown, speed, gameOverFlag);
-    //jump
-    if ((cursors.up.isDown || this.controls.upFlag) && player.body.onFloor()) {
-      player.setVelocityY(-450);
-    }
-    playerObj.jump(cursors, this.controls, playerUp, playerDown);
+
     //dangerous
     this.physics.world.overlapTiles(
       player,
@@ -417,15 +446,7 @@ export default class GameScene extends Phaser.Scene {
     );
     sound.playRiver(isClose(player, dangerousTiles), data.stopSound);
     //sound
-    sound.updateSound(
-      cursors,
-      player,
-      playerUp,
-      playerDown,
-      this.slopeCurrent,
-      playerObj.isJumping,
-      data.stopSound
-    );
+    sound.updateSound(cursors, player, playerUp, playerDown, playerObj.isJumping, data.stopSound);
     //sound.updateRunOnSlopes(cursors, playerUp, playerDown);
     if (player.y > 1024) {
       this.gameOver();
@@ -435,8 +456,6 @@ export default class GameScene extends Phaser.Scene {
 
   gameOver() {
     if (!gameOverFlag) return;
-    // leftSlopes = [];
-    // rightSlopes = [];
     this.lives.lose(heartsIndex.value);
     playerObj.playBlinking();
     heartsIndex.value--;
@@ -461,7 +480,7 @@ export default class GameScene extends Phaser.Scene {
         function () {
           this.cameras.main.fadeIn(350);
           player.x = playerX;
-          player.y = 400;
+          player.y = playerY;
           gameOverFlag = true;
           //this.cameras.main.fadeOut(250);
           //this.scene.restart();
